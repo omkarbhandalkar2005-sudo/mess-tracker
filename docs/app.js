@@ -301,6 +301,12 @@ function addTiffin() {
     });
 }
 
+function setRecordPaymentDefaults() {
+    const dateField = document.getElementById("pay_date");
+    // Only fill when empty, so an existing payment's date (e.g. when editing) is never overwritten.
+    if (dateField && !dateField.value) dateField.value = getTodayLocalDate();
+}
+
 function addPayment() {
     document.getElementById("payBtn").disabled = true;
 
