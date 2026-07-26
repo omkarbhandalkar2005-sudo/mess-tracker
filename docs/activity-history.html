@@ -111,7 +111,11 @@
             </div>
 
             <div class="history-toolbar admin-only" id="historyLookupGroup">
-                <input type="number" id="history_customer_id" placeholder="Enter customer ID" aria-label="Customer ID">
+                <div class="customer-selector">
+                    <input type="text" id="history_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="history_customer_id_list" aria-label="Search customer by name or ID">
+                    <input type="hidden" id="history_customer_id">
+                    <ul class="customer-selector-list" id="history_customer_id_list" role="listbox" hidden></ul>
+                </div>
                 <button class="btn btn-primary" onclick="loadHistory()">Load History</button>
             </div>
 
@@ -177,7 +181,9 @@
 <script>
     function initActivityHistory() {
         initCommon();
-        if (!isAdmin()) {
+        if (isAdmin()) {
+            initCustomerSelector("history_customer_id");
+        } else {
             loadHistory();
         }
     }

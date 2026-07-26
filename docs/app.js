@@ -88,6 +88,212 @@ function loadAllCustomers() {
     });
 }
 
+// ── Reusable searchable customer selector (combobox) ──
+// Used on Add Tiffin, Record Payment, Bill Summary and Activity History
+// wherever an admin used to type a raw customer ID. Markup convention for
+// a selector with base id "X":
+//   <input id="X_search">   — visible text search box
+//   <input id="X" type="hidden"> — keeps storing the numeric customer_id,
+//                                   same id everything else already reads
+//   <ul id="X_list">        — dropdown of matches
+// Fetches /customers once per page load, sorts alphabetically, and caches
+// it in memory so every selector instance on the page shares one request.
+let customerDirectoryCache   = null;
+let customerDirectoryPromise = null;
+
+function loadCustomerDirectory() {
+    if (customerDirectoryCache) return Promise.resolve(customerDirectoryCache);
+    if (customerDirectoryPromise) return customerDirectoryPromise;
+
+    customerDirectoryPromise = fetch(`${API}/customers`)
+        .then(res => {
+            if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+            return res.json();
+        })
+        .then(data => {
+            const list = Array.isArray(data) ? data.slice() : [];
+            list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
+            customerDirectoryCache = list;
+            return customerDirectoryCache;
+        })
+        .catch(err => {
+            console.error(err);
+            customerDirectoryPromise = null; // let a later call (e.g. a retry) try again
+            throw err;
+        });
+
+    return customerDirectoryPromise;
+}
+
+function initCustomerSelector(baseId) {
+    const searchEl = document.getElementById(`${baseId}_search`);
+    const hiddenEl = document.getElementById(baseId);
+    const listEl   = document.getElementById(`${baseId}_list`);
+    if (!searchEl || !hiddenEl || !listEl) return;
+
+    const readyPlaceholder = searchEl.getAttribute("placeholder") || "Search customer by name or ID...";
+    let matches  = [];
+    let activeIndex = -1;
+    let ready = false; // becomes true once the directory has loaded successfully
+
+    function label(customer) {
+        return `${customer.name} (#${customer.id})`;
+    }
+
+    function closeList() {
+        listEl.hidden = true;
+        searchEl.setAttribute("aria-expanded", "false");
+        searchEl.removeAttribute("aria-activedescendant");
+        activeIndex = -1;
+    }
+
+    function highlight(index) {
+        const options = listEl.querySelectorAll(".customer-selector-option");
+        options.forEach(opt => opt.classList.remove("active"));
+        if (index >= 0 && options[index]) {
+            options[index].classList.add("active");
+            options[index].scrollIntoView({ block: "nearest" });
+            searchEl.setAttribute("aria-activedescendant", options[index].id);
+        } else {
+            searchEl.removeAttribute("aria-activedescendant");
+        }
+        activeIndex = index;
+    }
+
+    function selectCustomer(customer) {
+        hiddenEl.value = customer.id;
+        searchEl.value = label(customer);
+        closeList();
+    }
+
+    function renderList() {
+        if (!ready) return; // no searching before the directory has loaded
+
+        // While a selection is showing (e.g. "Pranav Chikane (#5)"), treat
+        // opening the dropdown as "browse everyone" rather than filtering
+        // by that display text. Real filtering resumes once hiddenEl.value
+        // is cleared by an actual edit (see the "input" listener below).
+        const query = hiddenEl.value ? "" : searchEl.value.trim().toLowerCase();
+
+        loadCustomerDirectory().then(customers => {
+            matches = !query ? customers : customers.filter(c =>
+                c.name.toLowerCase().includes(query) || String(c.id).includes(query)
+            );
+
+            if (!matches.length) {
+                listEl.innerHTML = '<li class="customer-selector-empty">No customer found</li>';
+                listEl.hidden = false;
+                searchEl.setAttribute("aria-expanded", "true");
+                return;
+            }
+
+            listEl.innerHTML = matches.map((c, i) => `
+                <li class="customer-selector-option" id="${baseId}_opt_${i}" role="option" data-index="${i}">
+                    <span>${c.name}</span><span class="customer-selector-id">#${c.id}</span>
+                </li>`).join("");
+            listEl.hidden = false;
+            searchEl.setAttribute("aria-expanded", "true");
+
+            // If the currently-selected customer is in view, pre-highlight it
+            // so the dropdown visually confirms who's picked.
+            if (hiddenEl.value) {
+                const selectedIndex = matches.findIndex(c => String(c.id) === String(hiddenEl.value));
+                if (selectedIndex >= 0) highlight(selectedIndex);
+            }
+        });
+    }
+
+    searchEl.addEventListener("focus", () => {
+        // Selecting the existing text means the very next keystroke replaces
+        // it outright — a deliberate edit, which is when we actually clear
+        // the previous pick (see "input" below).
+        if (hiddenEl.value) searchEl.select();
+        renderList();
+    });
+
+    searchEl.addEventListener("input", () => {
+        // Typing again is a manual change to the search text, so whatever
+        // was previously picked no longer applies until a new option is chosen.
+        if (hiddenEl.value) hiddenEl.value = "";
+        renderList();
+    });
+
+    searchEl.addEventListener("keydown", (e) => {
+        if (!ready) return;
+
+        if (listEl.hidden && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+            e.preventDefault();
+            renderList();
+            return;
+        }
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (matches.length) highlight(Math.min(activeIndex + 1, matches.length - 1));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (matches.length) highlight(Math.max(activeIndex - 1, 0));
+        } else if (e.key === "Enter") {
+            if (!listEl.hidden && activeIndex >= 0 && matches[activeIndex]) {
+                e.preventDefault();
+                selectCustomer(matches[activeIndex]);
+            }
+        } else if (e.key === "Escape") {
+            if (!listEl.hidden) {
+                e.preventDefault();
+                closeList();
+            }
+        }
+        // Tab is left untouched — the browser moves focus to the next field
+        // on its own once a customer is selected.
+    });
+
+    // Prevent a dropdown click from blurring the input first (which would
+    // close the list before the click handler below ever runs).
+    listEl.addEventListener("mousedown", (e) => e.preventDefault());
+
+    listEl.addEventListener("click", (e) => {
+        const opt = e.target.closest(".customer-selector-option[data-index]");
+        if (!opt) return;
+        const customer = matches[Number(opt.dataset.index)];
+        if (customer) selectCustomer(customer);
+    });
+
+    searchEl.addEventListener("blur", closeList);
+
+    document.addEventListener("click", (e) => {
+        if (!searchEl.contains(e.target) && !listEl.contains(e.target)) closeList();
+    });
+
+    // ── Loading / error / ready lifecycle ──
+    searchEl.disabled = true;
+    searchEl.placeholder = "Loading customers...";
+
+    loadCustomerDirectory()
+        .then(customers => {
+            ready = true;
+            searchEl.disabled = false;
+            searchEl.placeholder = readyPlaceholder;
+
+            // If the hidden field already holds an id (e.g. set by other
+            // code before this ran), reflect the matching name + id in the
+            // search box now that the directory is available.
+            if (hiddenEl.value) {
+                const existing = customers.find(c => String(c.id) === String(hiddenEl.value));
+                if (existing) searchEl.value = label(existing);
+            }
+        })
+        .catch(() => {
+            searchEl.disabled = true;
+            searchEl.placeholder = "Unable to load customers";
+            listEl.innerHTML =
+                '<li class="customer-selector-empty customer-selector-error">' +
+                'Unable to load customers.<br>Please refresh or try again.</li>';
+            listEl.hidden = false;
+            searchEl.setAttribute("aria-expanded", "true");
+        });
+}
+
 function getCustomerId(inputId) {
     if (isAdmin()) {
         return document.getElementById(inputId).value;

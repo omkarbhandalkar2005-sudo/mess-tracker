@@ -286,6 +286,20 @@ app.post('/forgot-password/reset', (req, res) => {
     });
 });
 
+// CUSTOMER DIRECTORY (lightweight — id + name only, for the searchable
+// customer selector used across Add Tiffin, Record Payment, Bill Summary
+// and Activity History). Reuses the same role='customer' filter as
+// /all-customers-summary, just without the billing joins.
+app.get('/customers', (req, res) => {
+    db.query("SELECT id, name FROM customers WHERE role = 'customer' ORDER BY id ASC", (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error fetching customers" });
+        }
+        res.status(200).json(result);
+    });
+});
+
 // ADD TIFFIN
 app.post('/add-tiffin', (req, res) => {
     const { customer_id, date, type, quantity, extra_roti, extra_bhakari } = req.body;
