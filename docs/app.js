@@ -103,7 +103,7 @@ let customerDirectoryPromise = null;
 
 function sortCustomersByName(customers) {
     return customers.slice().sort((a, b) =>
-        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+        a.name.trim().localeCompare(b.name.trim(), undefined, { sensitivity: "base" })
     );
 }
 
