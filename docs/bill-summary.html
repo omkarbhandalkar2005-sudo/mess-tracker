@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="My Mess home — manage tiffin bookings, payments, and billing.">
-    <title>Add Tiffin — My Mess</title>
+    <title>Bill Summary — My Mess</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -17,7 +17,7 @@
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
     </script>
 </head>
-<body data-page="add-tiffin">
+<body data-page="bill-summary">
 
 <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-brand">
@@ -94,65 +94,55 @@
     </aside>
 <main class="page">
     <header class="page-header">
-        <h1>Add Tiffin</h1>
-        <p id="pageSubtitle">Add a tiffin entry for a customer</p>
+        <h1>Bill Summary</h1>
+        <p id="pageSubtitle">View bill details for a customer</p>
     </header>
 
     <div class="grid">
 
-        <!-- Add Tiffin (Admin) -->
-        <section class="card admin-only" id="addSection" aria-labelledby="addTiffinHeading">
-            <div class="card-header">
-                <div class="card-icon" aria-hidden="true">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-                    </svg>
+        <!-- Bill -->
+        <section class="card" aria-labelledby="billHeading">
+            <div class="card-header month-filter-header">
+                <div class="month-filter-title">
+                    <div class="card-icon amber" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                        </svg>
+                    </div>
+                    <h2 id="billHeading">Bill Summary</h2>
                 </div>
-                <h2 id="addTiffinHeading">Add Tiffin</h2>
+                <label class="month-filter-label" for="billMonthFilter">
+                    <span class="sr-only">Select month</span>
+                    <input type="month" id="billMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onBillMonthChange()">
+                </label>
             </div>
 
-            <div class="form-group">
-                <label for="customer_id_search">Customer</label>
+            <div class="form-group admin-only" id="billLookupGroup">
+                <label for="bill_customer_id_search">Customer</label>
                 <div class="customer-selector">
-                    <input type="text" id="customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="customer_id">
-                    <ul class="customer-selector-list" id="customer_id_list" role="listbox" hidden></ul>
+                    <input type="text" id="bill_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="bill_customer_id_list" aria-label="Search customer by name or ID">
+                    <input type="hidden" id="bill_customer_id">
+                    <ul class="customer-selector-list" id="bill_customer_id_list" role="listbox" hidden></ul>
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="date" id="date">
-                </div>
-                <div class="form-group">
-                    <label for="type">Food Type</label>
-                    <select id="type">
-                        <option>Veg</option>
-                        <option>Non-Veg</option>
-                        <option>Fast</option>
-                    </select>
+            <button class="btn btn-primary admin-only" onclick="getBill()">View Bill</button>
+            <div id="bill_result" aria-live="polite"></div>
+
+            <!-- UPI Pay Button - Customer Only -->
+            <div class="customer-only" id="payNowSection" style="margin-top: 1rem; display: none;">
+                <button class="btn btn-primary" onclick="toggleQR()" id="payNowBtn">
+                    💳 Pay via UPI
+                </button>
+
+                <div id="qrSection" style="display: none; margin-top: 1rem; text-align: center;">
+                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" style="width: 200px; height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                    <p style="margin-top: 8px; font-size: var(--text-sm); color: var(--text-muted);">UPI ID: <strong>9021081442@axl</strong></p>
+                    <p style="font-size: var(--text-xs); color: var(--text-muted);">You can scan QR code using any UPI app</p>
+                    <p style="font-size: var(--text-xs); color: var(--warning); margin-top: 4px;">⚠️ Admin will record after payment</p>
                 </div>
             </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="quantity">Tiffin quantity</label>
-                    <input type="number" id="quantity" placeholder="0" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="extra_roti">Extra roti</label>
-                    <input type="number" id="extra_roti" placeholder="0" min="0">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="extra_bhakari">Extra bhakari</label>
-                <input type="number" id="extra_bhakari" placeholder="0" min="0">
-            </div>
-
-            <button class="btn btn-primary" id="addBtn" onclick="addTiffin()">Add Tiffin</button>
-            <div id="result" aria-live="polite"></div>
         </section>
 
         <!-- Customer profile (modal) -->
@@ -201,15 +191,17 @@
 
 <script src="app.js"></script>
 <script>
-    function initAddTiffin() {
+    function initBillSummary() {
         initCommon();
         if (isAdmin()) {
-            setAddTiffinDefaults();
-            initCustomerSelector("customer_id");
+            initCustomerSelector("bill_customer_id");
+        } else {
+            document.getElementById("payNowSection").style.display = "block";
+            getBill();
         }
     }
 
-    initAddTiffin();
+    initBillSummary();
 </script>
 
 </body>

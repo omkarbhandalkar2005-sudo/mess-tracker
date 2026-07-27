@@ -64,6 +64,13 @@
                 </svg>
                 <span>Add Tiffin</span>
             </a>
+            <a href="bill-summary.html" class="sidebar-link" data-page="bill-summary" onclick="closeSidebar()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                </svg>
+                <span>Bill Summary</span>
+            </a>
             <a href="record-payment.html" class="sidebar-link admin-only" data-page="record-payment" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -88,7 +95,7 @@
 <main class="page">
     <header class="page-header">
         <h1>Home</h1>
-        <p id="pageSubtitle">Manage tiffins, payments, and billing</p>
+        <p id="pageSubtitle">Manage tiffins and today's menu</p>
     </header>
 
     <div class="grid">
@@ -175,51 +182,6 @@
                 </div>
             </section>
         </div>
-
-        <!-- Bill -->
-        <section class="card" aria-labelledby="billHeading">
-            <div class="card-header month-filter-header">
-                <div class="month-filter-title">
-                    <div class="card-icon amber" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                        </svg>
-                    </div>
-                    <h2 id="billHeading">Bill Summary</h2>
-                </div>
-                <label class="month-filter-label" for="billMonthFilter">
-                    <span class="sr-only">Select month</span>
-                    <input type="month" id="billMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onBillMonthChange()">
-                </label>
-            </div>
-
-            <div class="form-group admin-only" id="billLookupGroup">
-                <label for="bill_customer_id_search">Customer</label>
-                <div class="customer-selector">
-                    <input type="text" id="bill_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="bill_customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="bill_customer_id">
-                    <ul class="customer-selector-list" id="bill_customer_id_list" role="listbox" hidden></ul>
-                </div>
-            </div>
-
-            <button class="btn btn-primary admin-only" onclick="getBill()">View Bill</button>
-            <div id="bill_result" aria-live="polite"></div>
-
-            <!-- UPI Pay Button - Customer Only -->
-            <div class="customer-only" id="payNowSection" style="margin-top: 1rem; display: none;">
-                <button class="btn btn-primary" onclick="toggleQR()" id="payNowBtn">
-                    💳 Pay via UPI
-                </button>
-
-                <div id="qrSection" style="display: none; margin-top: 1rem; text-align: center;">
-                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" style="width: 200px; height: 200px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-                    <p style="margin-top: 8px; font-size: var(--text-sm); color: var(--text-muted);">UPI ID: <strong>9021081442@axl</strong></p>
-                    <p style="font-size: var(--text-xs); color: var(--text-muted);">You can scan QR code using any UPI app</p>
-                    <p style="font-size: var(--text-xs); color: var(--warning); margin-top: 4px;">⚠️ Admin will record after payment</p>
-                </div>
-            </div>
-        </section>
 
         <!-- Today's Menu (Admin) -->
         <section class="card grid-full admin-only" id="menuManageSection" aria-labelledby="menuManageHeading">
@@ -312,15 +274,12 @@
 
         if (isAdmin()) {
             document.getElementById("pageSubtitle").innerText =
-                "Manage tiffins, payments, and billing for all customers";
+                "Manage tiffins and today's menu for all customers";
             loadBookings();
             loadMenuManager();
-            initCustomerSelector("bill_customer_id");
         } else {
             document.getElementById("pageSubtitle").innerText =
-                "View your bill and meal history";
-            document.getElementById("payNowSection").style.display = "block";
-            getBill();
+                "View your meals for today";
             loadTodaysMeals();
         }
     }
