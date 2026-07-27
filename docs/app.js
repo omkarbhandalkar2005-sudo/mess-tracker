@@ -101,6 +101,12 @@ function loadAllCustomers() {
 let customerDirectoryCache   = null;
 let customerDirectoryPromise = null;
 
+function sortCustomersByName(customers) {
+    return customers.slice().sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, { sensitivity: "base" })
+    );
+}
+
 function loadCustomerDirectory() {
     if (customerDirectoryCache) return Promise.resolve(customerDirectoryCache);
     if (customerDirectoryPromise) return customerDirectoryPromise;
@@ -111,9 +117,8 @@ function loadCustomerDirectory() {
             return res.json();
         })
         .then(data => {
-            const list = Array.isArray(data) ? data.slice() : [];
-            list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base" }));
-            customerDirectoryCache = list;
+            const list = Array.isArray(data) ? data : [];
+            customerDirectoryCache = sortCustomersByName(list);
             return customerDirectoryCache;
         })
         .catch(err => {
@@ -176,9 +181,10 @@ function initCustomerSelector(baseId) {
         const query = hiddenEl.value ? "" : searchEl.value.trim().toLowerCase();
 
         loadCustomerDirectory().then(customers => {
-            matches = !query ? customers : customers.filter(c =>
+            const filtered = !query ? customers : customers.filter(c =>
                 c.name.toLowerCase().includes(query) || String(c.id).includes(query)
             );
+            matches = sortCustomersByName(filtered);
 
             if (!matches.length) {
                 listEl.innerHTML = '<li class="customer-selector-empty">No customer found</li>';
