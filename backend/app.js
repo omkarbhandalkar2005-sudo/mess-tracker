@@ -11,7 +11,7 @@ app.use(express.json());
 
 const TIFFIN_PRICE  = 70;
 const FAST_PRICE    = 40;
-const ROTI_PRICE    = 15;
+const CHAPATI_PRICE    = 15;
 const BHAKARI_PRICE = 20;
 
 const otpStore      = {};
@@ -422,7 +422,7 @@ function buildMonthlyLedger(monthlyRows, totalPaidPool) {
         const totalAmount =
             (row.regularTiffin || 0) * TIFFIN_PRICE  +
             (row.fastTiffin    || 0) * FAST_PRICE    +
-            (row.totalRoti     || 0) * ROTI_PRICE    +
+            (row.totalChapati     || 0) * CHAPATI_PRICE    +
             (row.totalBhakari  || 0) * BHAKARI_PRICE;
 
         const paid    = Math.min(remaining, totalAmount);
@@ -431,7 +431,7 @@ function buildMonthlyLedger(monthlyRows, totalPaidPool) {
 
         ledger.set(`${row.y}-${row.m}`, {
             totalTiffin,
-            extraRoti:    row.totalRoti    || 0,
+            extraChapati:    row.totalChapati    || 0,
             extraBhakari: row.totalBhakari || 0,
             totalAmount,
             paid,
@@ -455,7 +455,7 @@ app.get('/final-bill/:id', (req, res) => {
         const tiffinSql = `SELECT
                                   SUM(CASE WHEN type = 'Fast' THEN quantity ELSE 0 END) AS fastTiffin,
                                   SUM(CASE WHEN type != 'Fast' THEN quantity ELSE 0 END) AS regularTiffin,
-                                  SUM(extra_roti) AS totalRoti,
+                                  SUM(extra_roti) AS totalChapati,
                                   SUM(extra_bhakari) AS totalBhakari
                            FROM tiffin WHERE customer_id = ?`;
 
@@ -479,7 +479,7 @@ app.get('/final-bill/:id', (req, res) => {
                 const totalAmount =
                     (t.regularTiffin || 0) * TIFFIN_PRICE  +
                     (t.fastTiffin    || 0) * FAST_PRICE    +
-                    (t.totalRoti     || 0) * ROTI_PRICE    +
+                    (t.totalChapati     || 0) * CHAPATI_PRICE    +
                     (t.totalBhakari  || 0) * BHAKARI_PRICE;
 
                 const totalPaid = paymentResult[0].totalPaid || 0;
@@ -487,7 +487,7 @@ app.get('/final-bill/:id', (req, res) => {
 
                 res.status(200).json({
                     totalTiffin,
-                    extraRoti:    t.totalRoti    || 0,
+                    extraChapati:    t.totalChapati    || 0,
                     extraBhakari: t.totalBhakari || 0,
                     totalAmount,
                     totalPaid,
@@ -506,7 +506,7 @@ app.get('/final-bill/:id', (req, res) => {
     const monthlyTiffinSql = `SELECT YEAR(date) AS y, MONTH(date) AS m,
                                       SUM(CASE WHEN type = 'Fast' THEN quantity ELSE 0 END) AS fastTiffin,
                                       SUM(CASE WHEN type != 'Fast' THEN quantity ELSE 0 END) AS regularTiffin,
-                                      SUM(extra_roti) AS totalRoti,
+                                      SUM(extra_roti) AS totalChapati,
                                       SUM(extra_bhakari) AS totalBhakari
                                FROM tiffin
                                WHERE customer_id = ?
@@ -530,12 +530,12 @@ app.get('/final-bill/:id', (req, res) => {
             const totalPaidPool = paymentResult[0].totalPaid || 0;
             const ledger = buildMonthlyLedger(monthlyRows, totalPaidPool);
             const entry  = ledger.get(`${Number(year)}-${Number(month)}`) || {
-                totalTiffin: 0, extraRoti: 0, extraBhakari: 0, totalAmount: 0, paid: 0, pending: 0
+                totalTiffin: 0, extraChapati: 0, extraBhakari: 0, totalAmount: 0, paid: 0, pending: 0
             };
 
             res.status(200).json({
                 totalTiffin:  entry.totalTiffin,
-                extraRoti:    entry.extraRoti,
+                extraChapati:    entry.extraChapati,
                 extraBhakari: entry.extraBhakari,
                 totalAmount:  entry.totalAmount,
                 totalPaid:    entry.paid,
@@ -558,7 +558,7 @@ app.get('/all-customers-summary', (req, res) => {
         const tiffinSql = `SELECT customer_id,
                                   SUM(CASE WHEN type = 'Fast' THEN quantity ELSE 0 END) AS fastTiffin,
                                   SUM(CASE WHEN type != 'Fast' THEN quantity ELSE 0 END) AS regularTiffin,
-                                  SUM(extra_roti) AS totalRoti,
+                                  SUM(extra_roti) AS totalChapati,
                                   SUM(extra_bhakari) AS totalBhakari
                            FROM tiffin
                            GROUP BY customer_id`;
@@ -598,7 +598,7 @@ app.get('/all-customers-summary', (req, res) => {
                         const totalAmount =
                             (t.regularTiffin || 0) * TIFFIN_PRICE  +
                             (t.fastTiffin    || 0) * FAST_PRICE    +
-                            (t.totalRoti     || 0) * ROTI_PRICE    +
+                            (t.totalChapati     || 0) * CHAPATI_PRICE    +
                             (t.totalBhakari  || 0) * BHAKARI_PRICE;
 
                         const totalPaid = paymentMap[c.id] || 0;
@@ -621,7 +621,7 @@ app.get('/all-customers-summary', (req, res) => {
     const monthlyTiffinSql = `SELECT customer_id, YEAR(date) AS y, MONTH(date) AS m,
                                       SUM(CASE WHEN type = 'Fast' THEN quantity ELSE 0 END) AS fastTiffin,
                                       SUM(CASE WHEN type != 'Fast' THEN quantity ELSE 0 END) AS regularTiffin,
-                                      SUM(extra_roti) AS totalRoti,
+                                      SUM(extra_roti) AS totalChapati,
                                       SUM(extra_bhakari) AS totalBhakari
                                FROM tiffin
                                GROUP BY customer_id, YEAR(date), MONTH(date)
@@ -663,7 +663,7 @@ app.get('/all-customers-summary', (req, res) => {
                 const summary = customers.map(c => {
                     const ledger = buildMonthlyLedger(rowsByCustomer[c.id] || [], paidPoolMap[c.id] || 0);
                     const entry  = ledger.get(key) || {
-                        totalTiffin: 0, extraRoti: 0, extraBhakari: 0, totalAmount: 0, paid: 0, pending: 0
+                        totalTiffin: 0, extraChapati: 0, extraBhakari: 0, totalAmount: 0, paid: 0, pending: 0
                     };
 
                     return {
