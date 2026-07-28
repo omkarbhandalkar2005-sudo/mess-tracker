@@ -488,7 +488,7 @@ function addTiffin() {
         date: document.getElementById("date").value,
         type: document.getElementById("type").value,
         quantity: document.getElementById("quantity").value,
-        extra_roti: document.getElementById("extra_roti").value || 0,
+        extra_chapati: document.getElementById("extra_chapati").value || 0,
         extra_bhakari: document.getElementById("extra_bhakari").value || 0
     };
 
@@ -592,8 +592,8 @@ function getBill() {
                     <div class="stat-value">${data.totalTiffin}</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-label">Extra Roti</div>
-                    <div class="stat-value">${data.extraRoti}</div>
+                    <div class="stat-label">Extra Chapati</div>
+                    <div class="stat-value">${data.extraChapati}</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Extra Bhakari</div>
@@ -634,7 +634,7 @@ function loadHistory() {
             { key: "date", label: "Date" },
             { key: "type", label: "Type" },
             { key: "quantity", label: "Qty" },
-            { key: "extra_roti", label: "Roti" },
+            { key: "extra_chapati", label: "Chapati" },
             { key: "extra_bhakari", label: "Bhakari" }
         ], isAdmin() ? "deleteTiffin" : null);
         document.getElementById("payment_history").innerHTML = renderTable(payments, [
