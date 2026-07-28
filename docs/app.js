@@ -670,6 +670,13 @@ function formatTime12(t) {
 }
 
 // ── Today's Meals (Customer) ──
+// Purely cosmetic: swaps ';' separators for a cleaner middle-dot separator
+// when displaying menu text. Doesn't touch the underlying stored text.
+function formatMenuText(text) {
+    if (!text) return text;
+    return text.split(";").map(s => s.trim()).filter(Boolean).join(" · ");
+}
+
 function loadTodaysMeals() {
     const id        = localStorage.getItem("customer_id");
     const container = document.getElementById("todaysMealsList");
@@ -714,14 +721,14 @@ function loadTodaysMeals() {
                         <p class="meal-choice-label">Choose Meal</p>
                         <label class="meal-choice-option">
                             <input type="radio" name="foodType_${m.key}" value="Veg" ${info.selected_food_type !== "Non-Veg" ? "checked" : ""}>
-                            <span class="meal-choice-text"><strong>Veg</strong><br>${info.veg_menu_text || "—"}</span>
+                            <span class="meal-choice-text"><strong>Veg</strong><br><span class="meal-menu-text">${formatMenuText(info.veg_menu_text) || "—"}</span></span>
                         </label>
                         <label class="meal-choice-option">
                             <input type="radio" name="foodType_${m.key}" value="Non-Veg" ${info.selected_food_type === "Non-Veg" ? "checked" : ""}>
-                            <span class="meal-choice-text"><strong>Non-Veg</strong><br>${info.nonveg_menu_text}</span>
+                            <span class="meal-choice-text"><strong>Non-Veg</strong><br><span class="meal-menu-text">${formatMenuText(info.nonveg_menu_text)}</span></span>
                         </label>
                     </div>`
-                : `<p class="meal-menu">${info.veg_menu_text || "—"}</p>`;
+                : `<p class="meal-menu">${formatMenuText(info.veg_menu_text) || "—"}</p>`;
 
             return `<div class="meal-card">
                 <div class="meal-card-head">

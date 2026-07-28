@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@600&display=swap');
 
 :root {
     /* Neutral surfaces — true grayscale (not blue-tinted) for an authentic Geist feel */
@@ -678,9 +679,12 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
 }
 
 .meal-menu {
-    font-size: 0.8125rem;
-    color: var(--text-muted);
-    line-height: 1.5;
+    font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.7;
+    letter-spacing: 0.2px;
+    color: #F5F5F5;
     flex-grow: 1;
 }
 
@@ -747,6 +751,16 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
 }
 
 .meal-choice-text strong { color: var(--text); }
+
+.meal-menu-text {
+    display: inline-block;
+    font-family: 'Manrope', 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.7;
+    letter-spacing: 0.2px;
+    color: #F5F5F5;
+}
 
 /* ── Month-Year filter (All Customers / Bill Summary / Activity History) ── */
 .sr-only {
