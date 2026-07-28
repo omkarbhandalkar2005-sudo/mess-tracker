@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="My Mess" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=2">
     <script>
         document.documentElement.className =
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
@@ -181,7 +181,7 @@
                         <div class="stat-value" id="display_email" style="font-size: var(--text-base);">—</div>
                     </div>
                 </div>
-                <button class="btn btn-ghost btn-sm" style="margin-top: 1rem; display: block; margin-left: auto; margin-right: auto;" onclick="logout()">Sign Out</button>
+                <button class="btn btn-ghost btn-sm btn-center-block" onclick="logout()">Sign Out</button>
             </section>
         </div>
 
@@ -189,7 +189,7 @@
 </main>
 </div>
 
-<script src="app.js?v=2"></script>
+<script src="app.js?v=3"></script>
 <script>
     function initBillSummary() {
         initCommon();

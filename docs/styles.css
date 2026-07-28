@@ -185,6 +185,11 @@ html.role-admin .customer-only { display: none !important; }
     margin-top: var(--space-6);
 }
 
+.btn-center-block {
+    display: block;
+    margin: 1rem auto 0;
+}
+
 /* ── Layout (mobile-first: base = small screens) ── */
 .page {
     max-width: 1100px;
