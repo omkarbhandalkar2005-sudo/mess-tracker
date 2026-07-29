@@ -670,11 +670,11 @@ function formatTime12(t) {
 }
 
 // ── Today's Meals (Customer) ──
-// Purely cosmetic: swaps ';' separators for a cleaner middle-dot separator
+// Purely cosmetic: swaps ',' separators for a cleaner middle-dot separator
 // when displaying menu text. Doesn't touch the underlying stored text.
 function formatMenuText(text) {
     if (!text) return text;
-    return text.split(";").map(s => s.trim()).filter(Boolean).join(" · ");
+    return text.split(",").map(s => s.trim()).filter(Boolean).join(" · ");
 }
 
 function loadTodaysMeals() {
