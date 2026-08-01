@@ -136,15 +136,11 @@
                     💳 Pay via UPI
                 </button>
 
-                <div id="qrSection" style="display: none; margin-top: 1rem; text-align: center;">
-                    <div class="qr-card">
-                        <div class="qr-image-frame">
-                            <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-image">
-                        </div>
-                        <p style="margin-top: 8px; font-size: var(--text-sm); color: var(--text-muted);">UPI ID: <strong>9021081442@axl</strong></p>
-                        <p style="font-size: var(--text-xs); color: var(--text-muted);">You can scan QR code using any UPI app</p>
-                        <p style="font-size: var(--text-xs); color: var(--warning); margin-top: 4px;">⚠️ Admin will record after payment</p>
-                    </div>
+                <div id="qrSection" class="qr-section" style="display: none;">
+                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-code-img">
+                    <p class="qr-upi-id">UPI ID: <strong>9021081442@axl</strong></p>
+                    <p class="qr-instruction">You can scan QR code using any UPI app</p>
+                    <p class="qr-warning">⚠️ Admin will record after payment</p>
                 </div>
 
                 <!-- Always-visible primary action: opens the installed UPI app directly via deep link -->
@@ -214,7 +210,6 @@
     initBillSummary();
 
     // ── UPI "Pay Now" deep link (frontend-only; no amount prefilled, no billing logic touched) ──
-    var UPI_PAYMENT_URI = "upi://pay?pa=9021081442@axl&pn=My%20Mess&cu=INR";
     var upiPaymentPending = false;
 
     function payViaUpiApp() {
@@ -223,8 +218,16 @@
             msgEl.className = "";
             msgEl.textContent = "";
         }
+        // A fresh, unique transaction reference (tr) per click + a note (tn) —
+        // apps like PhonePe/GPay are more likely to flag a bare pa/pn/cu link
+        // (especially the exact same link hit repeatedly) as suspicious and
+        // decline it "for security reasons".
+        var txnRef = "MM" + Date.now();
+        var upiUri = "upi://pay?pa=9021081442@axl&pn=My%20Mess&cu=INR"
+            + "&tr=" + encodeURIComponent(txnRef)
+            + "&tn=" + encodeURIComponent("My Mess Payment");
         upiPaymentPending = true;
-        window.location.href = UPI_PAYMENT_URI;
+        window.location.href = upiUri;
     }
 
     function handleReturnFromUpiApp() {
