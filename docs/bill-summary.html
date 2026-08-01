@@ -136,12 +136,22 @@
                     💳 Pay via UPI
                 </button>
 
-                <div id="qrSection" class="qr-section" style="display: none;">
-                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-code-img">
-                    <p class="qr-upi-id">UPI ID: <strong>9021081442@axl</strong></p>
-                    <p class="qr-instruction">You can scan QR code using any UPI app</p>
-                    <p class="qr-warning">⚠️ Admin will record after payment</p>
+                <div id="qrSection" style="display: none; margin-top: 1rem; text-align: center;">
+                    <div class="qr-card">
+                        <div class="qr-image-frame">
+                            <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-image">
+                        </div>
+                        <p style="margin-top: 8px; font-size: var(--text-sm); color: var(--text-muted);">UPI ID: <strong>9021081442@axl</strong></p>
+                        <p style="font-size: var(--text-xs); color: var(--text-muted);">You can scan QR code using any UPI app</p>
+                        <p style="font-size: var(--text-xs); color: var(--warning); margin-top: 4px;">⚠️ Admin will record after payment</p>
+                    </div>
                 </div>
+
+                <!-- Always-visible primary action: opens the installed UPI app directly via deep link -->
+                <button type="button" class="btn btn-primary" id="upiPayNowBtn" style="margin-top: 1rem;" onclick="payViaUpiApp()">
+                    💳 Pay Now
+                </button>
+                <div id="upiReturnMessage" aria-live="polite" style="text-align: center;"></div>
             </div>
         </section>
 
@@ -202,6 +212,38 @@
     }
 
     initBillSummary();
+
+    // ── UPI "Pay Now" deep link (frontend-only; no amount prefilled, no billing logic touched) ──
+    var UPI_PAYMENT_URI = "upi://pay?pa=9021081442@axl&pn=My%20Mess&cu=INR";
+    var upiPaymentPending = false;
+
+    function payViaUpiApp() {
+        var msgEl = document.getElementById("upiReturnMessage");
+        if (msgEl) {
+            msgEl.className = "";
+            msgEl.textContent = "";
+        }
+        upiPaymentPending = true;
+        window.location.href = UPI_PAYMENT_URI;
+    }
+
+    function handleReturnFromUpiApp() {
+        if (!upiPaymentPending) return;
+        upiPaymentPending = false;
+        var msgEl = document.getElementById("upiReturnMessage");
+        if (msgEl) {
+            msgEl.className = "alert alert-info";
+            msgEl.textContent = "Payment will be verified by the admin.";
+        }
+    }
+
+    // Multiple signals covered for reliable "returned to the app" detection across
+    // modern Android browsers (Chrome, Samsung Internet, etc.) after the UPI app opens.
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) handleReturnFromUpiApp();
+    });
+    window.addEventListener("pageshow", handleReturnFromUpiApp);
+    window.addEventListener("focus", handleReturnFromUpiApp);
 </script>
 
 </body>
