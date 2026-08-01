@@ -260,6 +260,64 @@ html.role-admin .customer-only { display: none !important; }
 .card-icon.amber { background: rgba(217, 119, 6, 0.18); color: #fbbf24; }
 .card-icon.blue { background: rgba(37, 99, 235, 0.2); color: #60a5fa; }
 
+/* ── UPI QR Payment Section ── */
+.qr-section {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.qr-code-img {
+    width: 200px;
+    height: 200px;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+}
+
+.qr-upi-id {
+    margin-top: 8px;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+}
+
+.qr-instruction {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+}
+
+.qr-warning {
+    font-size: var(--text-xs);
+    color: var(--warning);
+    margin-top: 4px;
+}
+
+/* Mobile: enlarge the QR code so it scans without zooming, and trim
+   the whitespace around it. Desktop sizing above is left untouched. */
+@media (max-width: 480px) {
+    .qr-section {
+        margin-top: 0.75rem;
+    }
+
+    .qr-code-img {
+        display: block;
+        width: 85%;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .qr-upi-id,
+    .qr-instruction,
+    .qr-warning {
+        padding: 0 0.5rem;
+        line-height: 1.45;
+    }
+
+    .qr-upi-id {
+        margin-top: 0.625rem;
+    }
+}
+
 /* ── Forms ── */
 .form-group { margin-bottom: var(--space-4); }
 
