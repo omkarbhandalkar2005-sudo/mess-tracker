@@ -142,12 +142,6 @@
                     <p class="qr-instruction">You can scan QR code using any UPI app</p>
                     <p class="qr-warning">⚠️ Admin will record after payment</p>
                 </div>
-
-                <!-- Always-visible primary action: opens the installed UPI app directly via deep link -->
-                <button type="button" class="btn btn-primary" id="upiPayNowBtn" style="margin-top: 1rem;" onclick="payViaUpiApp()">
-                    💳 Pay Now
-                </button>
-                <div id="upiReturnMessage" aria-live="polite" style="text-align: center;"></div>
             </div>
         </section>
 
@@ -208,46 +202,6 @@
     }
 
     initBillSummary();
-
-    // ── UPI "Pay Now" deep link (frontend-only; no amount prefilled, no billing logic touched) ──
-    var upiPaymentPending = false;
-
-    function payViaUpiApp() {
-        var msgEl = document.getElementById("upiReturnMessage");
-        if (msgEl) {
-            msgEl.className = "";
-            msgEl.textContent = "";
-        }
-        // A fresh, unique transaction reference (tr) per click + a note (tn) —
-        // apps like PhonePe/GPay are more likely to flag a bare pa/pn/cu link
-        // (especially the exact same link hit repeatedly) as suspicious and
-        // decline it "for security reasons".
-        var txnRef = "MM" + Date.now();
-        var upiUri = "upi://pay?pa=9021081442@axl&pn=My%20Mess&cu=INR"
-            + "&tr=" + encodeURIComponent(txnRef)
-            + "&tn=" + encodeURIComponent("My Mess Payment");
-        upiPaymentPending = true;
-        window.location.href = upiUri;
-    }
-
-    function handleReturnFromUpiApp() {
-        if (!upiPaymentPending) return;
-        upiPaymentPending = false;
-        var msgEl = document.getElementById("upiReturnMessage");
-        if (msgEl) {
-            msgEl.className = "alert alert-info";
-            msgEl.textContent = "Payment will be verified by the admin.";
-        }
-    }
-
-    // Multiple signals covered for reliable "returned to the app" detection across
-    // modern Android browsers (Chrome, Samsung Internet, etc.) after the UPI app opens.
-    document.addEventListener("visibilitychange", function () {
-        if (!document.hidden) handleReturnFromUpiApp();
-    });
-    window.addEventListener("pageshow", handleReturnFromUpiApp);
-    window.addEventListener("focus", handleReturnFromUpiApp);
-</script>
 
 </body>
 </html>
