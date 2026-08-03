@@ -300,6 +300,26 @@ app.get('/customers', (req, res) => {
     });
 });
 
+// TIFFIN LIST FOR A GIVEN DATE (used on Add Tiffin page to show "who has
+// taken a tiffin today" — same data as tiffin-history, just grouped by
+// date instead of by customer, with the customer name joined in).
+app.get('/tiffin-by-date/:date', (req, res) => {
+    const sql = `SELECT t.id, t.customer_id, c.name, t.type, t.quantity, t.extra_roti, t.extra_bhakari
+                 FROM tiffin t
+                 JOIN customers c ON c.id = t.customer_id
+                 WHERE t.date = ?
+                 ORDER BY c.name ASC`;
+
+    db.query(sql, [req.params.date], (err, result) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error fetching tiffin list" });
+        }
+
+        res.json(result);
+    });
+});
+
 // ADD TIFFIN
 app.post('/add-tiffin', (req, res) => {
     const { customer_id, date, type, quantity, extra_roti, extra_bhakari } = req.body;

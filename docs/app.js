@@ -502,6 +502,7 @@ function addTiffin() {
         showAlert("result", data.message, data.message.includes("success") ? "success" : "error");
         if (data.message.includes("success")) {
             setAddTiffinDefaults();
+            loadTodayTiffinList();
         }
     })
     .catch(err => {
@@ -510,6 +511,52 @@ function addTiffin() {
     })
     .finally(() => {
         document.getElementById("addBtn").disabled = false;
+    });
+}
+
+// ── Today's Tiffins (Add Tiffin page) ──
+// Shows who has already been given a tiffin for the date selected in the
+// form above (defaults to today), so the admin can see it at a glance
+// while adding new entries. Same table style as Activity History, but the
+// Date column is swapped for the Customer name since every row here is
+// already the same date.
+function loadTodayTiffinList() {
+    const container = document.getElementById("todayTiffinList");
+    if (!container) return;
+
+    const dateField = document.getElementById("date");
+    const date = (dateField && dateField.value) || getTodayLocalDate();
+
+    container.innerHTML = '<p class="empty">Loading...</p>';
+
+    fetch(`${API}/tiffin-by-date/${date}`)
+    .then(res => res.json())
+    .then(data => {
+        container.innerHTML = renderTable(data, [
+            { key: "name", label: "Customer" },
+            { key: "type", label: "Type" },
+            { key: "quantity", label: "Qty" },
+            { key: "extra_roti", label: "Chapati" },
+            { key: "extra_bhakari", label: "Bhakari" }
+        ], isAdmin() ? "deleteTodayTiffin" : null);
+    })
+    .catch(err => {
+        console.error(err);
+        container.innerHTML = '<p class="empty">Failed to load today\'s tiffins.</p>';
+    });
+}
+
+function deleteTodayTiffin(id) {
+    if (!confirm("Ye tiffin entry delete karni hai? Ye action undo nahi ho sakta.")) return;
+
+    fetch(`${API}/tiffin/${id}`, { method: "DELETE" })
+    .then(res => res.json())
+    .then(() => {
+        loadTodayTiffinList();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Delete failed. Please try again.");
     });
 }
 
