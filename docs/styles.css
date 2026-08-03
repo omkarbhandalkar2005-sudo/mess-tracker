@@ -68,11 +68,6 @@ body {
     line-height: 1.5;
     min-height: 100vh;
     overflow-x: hidden;
-    /* Prevent the browser from silently re-scrolling the page when async
-       content (e.g. Today's Tiffins) loads in and shifts page height —
-       that auto-adjustment is what caused the stray overlapping text seen
-       on Add Tiffin right after the page loads. */
-    overflow-anchor: none;
 }
 
 a { color: var(--primary); text-decoration: none; font-weight: 500; }
@@ -324,43 +319,6 @@ html.role-admin .customer-only { display: none !important; }
 }
 
 /* ── Forms ── */
-
-/* Add Tiffin form: denser spacing/text than the rest of the app's forms
-   (smaller padding, smaller font), and a centered card with proportional
-   side gutters (percentage-based, not a fixed px) so the same visual
-   spacing/proportions hold across different phone widths instead of
-   shrinking as the viewport gets wider. */
-#addSection {
-    max-width: 92%;
-    margin: 0 auto;
-    padding: var(--space-4);
-}
-
-#addSection .card-header {
-    margin-bottom: var(--space-3);
-    padding-bottom: var(--space-2);
-}
-
-#addSection .form-group {
-    margin-bottom: var(--space-3);
-}
-
-#addSection .form-group label {
-    font-size: var(--text-xs);
-    margin-bottom: 0.25rem;
-}
-
-#addSection input,
-#addSection select {
-    padding: 0.5rem 0.75rem;
-    font-size: var(--text-xs);
-}
-
-#addSection .btn-primary {
-    padding: 0.625rem var(--space-4);
-    font-size: var(--text-sm);
-}
-
 .form-group { margin-bottom: var(--space-4); }
 
 .form-group label {
