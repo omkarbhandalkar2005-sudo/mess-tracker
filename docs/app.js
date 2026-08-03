@@ -75,11 +75,28 @@ function loadAllCustomers() {
             <td style="color:${c.pending > 0 ? '#dc2626' : '#16a34a'};">₹${c.pending}</td>
         </tr>`).join("");
 
+        const totals = data.reduce((acc, c) => {
+            acc.totalTiffin += Number(c.totalTiffin) || 0;
+            acc.totalAmount += Number(c.totalAmount) || 0;
+            acc.totalPaid   += Number(c.totalPaid) || 0;
+            acc.pending     += Number(c.pending) || 0;
+            return acc;
+        }, { totalTiffin: 0, totalAmount: 0, totalPaid: 0, pending: 0 });
+
+        const totalRow = `<tr style="font-weight:600;border-top:2px solid rgba(255,255,255,0.15);">
+            <td></td>
+            <td>Total</td>
+            <td>${totals.totalTiffin}</td>
+            <td>₹${totals.totalAmount}</td>
+            <td>₹${totals.totalPaid}</td>
+            <td style="color:${totals.pending > 0 ? '#dc2626' : '#16a34a'};">₹${totals.pending}</td>
+        </tr>`;
+
         container.innerHTML = `<div class="table-wrap"><table>
             <thead><tr>
                 <th>ID</th><th>Name</th><th>Total Tiffins</th><th>Total Bill</th><th>Paid</th><th>Pending</th>
             </tr></thead>
-            <tbody>${rows}</tbody>
+            <tbody>${rows}${totalRow}</tbody>
         </table></div>`;
     })
     .catch(err => {
