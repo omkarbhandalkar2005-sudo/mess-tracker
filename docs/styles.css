@@ -319,6 +319,42 @@ html.role-admin .customer-only { display: none !important; }
 }
 
 /* ── Forms ── */
+
+/* Add Tiffin form: for phone screens — a narrower card with visible gutters
+   on both sides (not edge-to-edge) plus denser spacing/text than the rest
+   of the app's forms. Base styles here are mobile-first (this is the only
+   target device), so no media query needed. */
+#addSection {
+    max-width: 320px;
+    margin: 0 auto;
+    padding: var(--space-4);
+}
+
+#addSection .card-header {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-2);
+}
+
+#addSection .form-group {
+    margin-bottom: var(--space-3);
+}
+
+#addSection .form-group label {
+    font-size: var(--text-xs);
+    margin-bottom: 0.25rem;
+}
+
+#addSection input,
+#addSection select {
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-xs);
+}
+
+#addSection .btn-primary {
+    padding: 0.625rem var(--space-4);
+    font-size: var(--text-sm);
+}
+
 .form-group { margin-bottom: var(--space-4); }
 
 .form-group label {
