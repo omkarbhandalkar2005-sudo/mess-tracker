@@ -137,17 +137,29 @@
 
             <div class="form-group">
                 <label for="quantity">Tiffin quantity</label>
-                <input type="number" id="quantity" placeholder="0" min="0">
+                <div class="stepper" role="group" aria-labelledby="quantity-label">
+                    <button type="button" class="stepper-btn" aria-label="Decrease tiffin quantity" onclick="stepValue('quantity', -1)">&minus;</button>
+                    <input type="number" id="quantity" class="stepper-value" value="1" min="0" inputmode="numeric">
+                    <button type="button" class="stepper-btn" aria-label="Increase tiffin quantity" onclick="stepValue('quantity', 1)">+</button>
+                </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label for="extra_roti">Extra Chapati</label>
-                    <input type="number" id="extra_roti" placeholder="0" min="0">
+                    <div class="stepper" role="group">
+                        <button type="button" class="stepper-btn" aria-label="Decrease extra chapati" onclick="stepValue('extra_roti', -1)">&minus;</button>
+                        <input type="number" id="extra_roti" class="stepper-value" value="0" min="0" inputmode="numeric">
+                        <button type="button" class="stepper-btn" aria-label="Increase extra chapati" onclick="stepValue('extra_roti', 1)">+</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="extra_bhakari">Extra Bhakari</label>
-                    <input type="number" id="extra_bhakari" placeholder="0" min="0">
+                    <div class="stepper" role="group">
+                        <button type="button" class="stepper-btn" aria-label="Decrease extra bhakari" onclick="stepValue('extra_bhakari', -1)">&minus;</button>
+                        <input type="number" id="extra_bhakari" class="stepper-value" value="0" min="0" inputmode="numeric">
+                        <button type="button" class="stepper-btn" aria-label="Increase extra bhakari" onclick="stepValue('extra_bhakari', 1)">+</button>
+                    </div>
                 </div>
             </div>
 

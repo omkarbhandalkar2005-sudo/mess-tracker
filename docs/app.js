@@ -10,6 +10,15 @@ if (localStorage.getItem("loggedIn") !== "true") {
     window.location.href = "login.html";
 }
 
+function stepValue(id, delta) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const min = parseInt(el.min, 10) || 0;
+    const current = parseInt(el.value, 10) || 0;
+    const next = Math.max(min, current + delta);
+    el.value = next;
+}
+
 function getRole() {
     return (localStorage.getItem("role") || "customer").toLowerCase().trim();
 }

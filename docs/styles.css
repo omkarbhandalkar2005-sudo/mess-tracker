@@ -355,6 +355,67 @@ input:focus, select:focus, textarea:focus {
 
 input::placeholder, textarea::placeholder { color: var(--text-muted); }
 
+/* ── Stepper (+/- quantity control) ── */
+.stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    background: var(--surface);
+    padding: 0.25rem;
+}
+
+.stepper:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(31, 206, 184, 0.5);
+}
+
+.stepper-btn {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--primary);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.stepper-btn:hover { background: var(--primary-light); }
+.stepper-btn:active { transform: scale(0.92); }
+
+.stepper-value {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    border: none !important;
+    background: transparent !important;
+    text-align: center;
+    font-size: var(--text-lg);
+    font-weight: 700;
+    color: var(--primary);
+    padding: 0 !important;
+    box-shadow: none !important;
+    -moz-appearance: textfield;
+}
+
+.stepper-value::-webkit-outer-spin-button,
+.stepper-value::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.stepper-value:focus { outline: none; box-shadow: none !important; }
+
 /* ── Customer selector (searchable combobox) ── */
 .customer-selector { position: relative; }
 
