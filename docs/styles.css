@@ -320,13 +320,11 @@ html.role-admin .customer-only { display: none !important; }
 
 /* ── Forms ── */
 
-/* Add Tiffin form: for phone screens — a narrower card with visible gutters
-   on both sides (not edge-to-edge) plus denser spacing/text than the rest
-   of the app's forms. Base styles here are mobile-first (this is the only
-   target device), so no media query needed. */
+/* Add Tiffin form: denser spacing/text than the rest of the app's forms
+   (smaller padding, smaller font) — card stays full width like every
+   other card; on a phone that's already narrow, so no extra centering
+   or width constraint is needed. */
 #addSection {
-    max-width: 320px;
-    margin: 0 auto;
     padding: var(--space-4);
 }
 
