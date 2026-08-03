@@ -331,7 +331,7 @@ html.role-admin .customer-only { display: none !important; }
 
 .form-row {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
     gap: var(--space-3);
 }
 
@@ -1047,7 +1047,6 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
 
 /* ── Larger screens: restore roomier spacing ── */
 @media (min-width: 640px) {
-    .form-row { grid-template-columns: 1fr 1fr; }
     .page { padding: var(--space-8) var(--space-6) 3rem; }
     .navbar { padding: 0 var(--space-6); }
 }
