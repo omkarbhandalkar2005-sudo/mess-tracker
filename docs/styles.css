@@ -68,6 +68,11 @@ body {
     line-height: 1.5;
     min-height: 100vh;
     overflow-x: hidden;
+    /* Prevent the browser from silently re-scrolling the page when async
+       content (e.g. Today's Tiffins) loads in and shifts page height —
+       that auto-adjustment is what caused the stray overlapping text seen
+       on Add Tiffin right after the page loads. */
+    overflow-anchor: none;
 }
 
 a { color: var(--primary); text-decoration: none; font-weight: 500; }
