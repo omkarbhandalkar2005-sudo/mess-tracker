@@ -849,11 +849,17 @@ function loadBookings() {
     const filterEl = document.getElementById("bookingsFoodTypeFilter");
     const foodTypeFilter = filterEl ? filterEl.value : "all";
 
+    const mealFilterEl = document.getElementById("bookingsMealFilter");
+    const mealFilter = mealFilterEl ? mealFilterEl.value : "all";
+
     fetch(`${API}/admin/bookings/today`)
     .then(res => res.json())
     .then(data => {
         if (foodTypeFilter !== "all") {
             data = data.filter(b => b.selected_food_type === foodTypeFilter);
+        }
+        if (mealFilter !== "all") {
+            data = data.filter(b => b.meal_type === mealFilter);
         }
 
         if (!data.length) {

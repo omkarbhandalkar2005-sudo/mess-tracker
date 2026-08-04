@@ -925,6 +925,12 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
     flex-shrink: 0;
 }
 
+.month-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
 .month-filter-input {
     width: auto;
     min-width: 140px;
