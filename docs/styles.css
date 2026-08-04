@@ -321,6 +321,8 @@ html.role-admin .customer-only { display: none !important; }
 /* ── Forms ── */
 .form-group { margin-bottom: var(--space-4); }
 
+.form-row > .form-group { min-width: 0; }
+
 .form-group label {
     display: block;
     font-size: 0.8125rem;
