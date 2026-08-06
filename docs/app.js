@@ -842,6 +842,27 @@ function bookMeal(mealType) {
 }
 
 // ── Booking Requests (Admin) ──
+let bookingsMealFilterValue = "Lunch";
+
+// Before noon -> Lunch, from noon onward -> Dinner.
+function getDefaultMealFilter() {
+    return new Date().getHours() < 12 ? "Lunch" : "Dinner";
+}
+
+// Purely visual: switches the active segment in the Lunch / Dinner
+// toggle, then reloads the bookings list filtered by the chosen meal.
+function setBookingsMealFilter(value) {
+    bookingsMealFilterValue = value;
+    ["Lunch", "Dinner"].forEach(key => {
+        const btn = document.getElementById(`bookingsMealFilter${key}`);
+        if (!btn) return;
+        const isActive = key === value;
+        btn.classList.toggle("active", isActive);
+        btn.setAttribute("aria-selected", isActive);
+    });
+    loadBookings();
+}
+
 function loadBookings() {
     const container = document.getElementById("bookingsList");
     container.innerHTML = '<p class="empty">Loading...</p>';
@@ -849,8 +870,7 @@ function loadBookings() {
     const filterEl = document.getElementById("bookingsFoodTypeFilter");
     const foodTypeFilter = filterEl ? filterEl.value : "all";
 
-    const mealFilterEl = document.getElementById("bookingsMealFilter");
-    const mealFilter = mealFilterEl ? mealFilterEl.value : "all";
+    const mealFilter = bookingsMealFilterValue;
 
     fetch(`${API}/admin/bookings/today`)
     .then(res => res.json())

@@ -112,14 +112,10 @@
                     <h2 id="bookingsHeading">Today's Booking Requests</h2>
                 </div>
                 <div class="month-filter-group">
-                    <label class="month-filter-label" for="bookingsMealFilter">
-                        <span class="sr-only">Filter by meal</span>
-                        <select id="bookingsMealFilter" class="month-filter-input" aria-label="Filter by meal" onchange="loadBookings()">
-                            <option value="all">Lunch &amp; Dinner</option>
-                            <option value="Lunch">Lunch</option>
-                            <option value="Dinner">Dinner</option>
-                        </select>
-                    </label>
+                    <div class="meal-filter-toggle" role="tablist" aria-label="Filter by meal">
+                        <button type="button" class="meal-filter-tab active" id="bookingsMealFilterLunch" role="tab" aria-selected="true" onclick="setBookingsMealFilter('Lunch')">☀️ Lunch</button>
+                        <button type="button" class="meal-filter-tab" id="bookingsMealFilterDinner" role="tab" aria-selected="false" onclick="setBookingsMealFilter('Dinner')">🌙 Dinner</button>
+                    </div>
                     <label class="month-filter-label" for="bookingsFoodTypeFilter">
                         <span class="sr-only">Filter by meal type</span>
                         <select id="bookingsFoodTypeFilter" class="month-filter-input" aria-label="Filter by meal type" onchange="loadBookings()">
@@ -276,7 +272,7 @@
 </main>
 </div>
 
-<script src="app.js?v=5"></script>
+<script src="app.js?v=6"></script>
 <script>
     function initHome() {
         initCommon();
@@ -284,7 +280,7 @@
         if (isAdmin()) {
             document.getElementById("pageSubtitle").innerText =
                 "Manage tiffins and today's menu for all customers";
-            loadBookings();
+            setBookingsMealFilter(getDefaultMealFilter());
             loadMenuManager();
         } else {
             document.getElementById("pageSubtitle").innerText =

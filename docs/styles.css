@@ -947,6 +947,40 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
     .month-filter-input { width: 100%; max-width: none; }
 }
 
+/* Segmented Lunch / Dinner filter (Today's Booking Requests) */
+.meal-filter-toggle {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.25rem;
+    width: 100%;
+    max-width: 320px;
+}
+
+.meal-filter-tab {
+    flex: 1;
+    padding: 0.5rem 0.9rem;
+    font-family: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+}
+
+.meal-filter-tab:hover { color: var(--text); }
+
+.meal-filter-tab.active {
+    background: var(--primary-strong);
+    color: #ffffff;
+}
+
 /* ── Today's Menu Manager (Admin, simple mode) ── */
 
 /* Header row: icon + title on the left, compact day selector on the right */
