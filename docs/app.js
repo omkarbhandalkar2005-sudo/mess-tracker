@@ -882,6 +882,9 @@ function loadBookings() {
             data = data.filter(b => b.meal_type === mealFilter);
         }
 
+        const countEl = document.getElementById("bookingsTiffinCount");
+        if (countEl) countEl.textContent = `Tiffins = ${data.length}`;
+
         if (!data.length) {
             container.innerHTML = '<p class="empty">No booking requests today.</p>';
             return;

@@ -116,6 +116,7 @@
                         <button type="button" class="meal-filter-tab active" id="bookingsMealFilterLunch" role="tab" aria-selected="true" onclick="setBookingsMealFilter('Lunch')">☀️ Lunch</button>
                         <button type="button" class="meal-filter-tab" id="bookingsMealFilterDinner" role="tab" aria-selected="false" onclick="setBookingsMealFilter('Dinner')">🌙 Dinner</button>
                     </div>
+                    <span class="tiffin-count-badge" id="bookingsTiffinCount" aria-live="polite">Tiffins = 0</span>
                     <label class="month-filter-label" for="bookingsFoodTypeFilter">
                         <span class="sr-only">Filter by meal type</span>
                         <select id="bookingsFoodTypeFilter" class="month-filter-input" aria-label="Filter by meal type" onchange="loadBookings()">

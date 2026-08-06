@@ -981,6 +981,20 @@ tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
     color: #ffffff;
 }
 
+.tiffin-count-badge {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 0.5rem 0.9rem;
+    font-size: var(--text-sm);
+    font-weight: 700;
+    color: var(--text);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    white-space: nowrap;
+}
+
 /* ── Today's Menu Manager (Admin, simple mode) ── */
 
 /* Header row: icon + title on the left, compact day selector on the right */
