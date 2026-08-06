@@ -558,6 +558,9 @@ function loadTodayTiffinList() {
     fetch(`${API}/tiffin-by-date/${date}`)
     .then(res => res.json())
     .then(data => {
+        const countEl = document.getElementById("todayTiffinCount");
+        if (countEl) countEl.textContent = `Tiffins = ${data.length}`;
+
         container.innerHTML = renderTable(data, [
             { key: "name", label: "Customer" },
             { key: "type", label: "Type" },
@@ -607,6 +610,9 @@ function loadDailyTiffinsHistory() {
     fetch(`${API}/tiffin-by-date/${date}`)
     .then(res => res.json())
     .then(data => {
+        const countEl = document.getElementById("dailyTiffinsCount");
+        if (countEl) countEl.textContent = `Tiffins = ${data.length}`;
+
         container.innerHTML = renderTable(data, [
             { key: "name", label: "Customer" },
             { key: "type", label: "Type" },
