@@ -842,27 +842,6 @@ function bookMeal(mealType) {
 }
 
 // ── Booking Requests (Admin) ──
-let bookingsMealFilterValue = "Lunch";
-
-// Before noon -> Lunch, from noon onward -> Dinner.
-function getDefaultMealFilter() {
-    return new Date().getHours() < 12 ? "Lunch" : "Dinner";
-}
-
-// Purely visual: switches the active segment in the Lunch / Dinner
-// toggle, then reloads the bookings list filtered by the chosen meal.
-function setBookingsMealFilter(value) {
-    bookingsMealFilterValue = value;
-    ["Lunch", "Dinner"].forEach(key => {
-        const btn = document.getElementById(`bookingsMealFilter${key}`);
-        if (!btn) return;
-        const isActive = key === value;
-        btn.classList.toggle("active", isActive);
-        btn.setAttribute("aria-selected", isActive);
-    });
-    loadBookings();
-}
-
 function loadBookings() {
     const container = document.getElementById("bookingsList");
     container.innerHTML = '<p class="empty">Loading...</p>';
@@ -870,20 +849,12 @@ function loadBookings() {
     const filterEl = document.getElementById("bookingsFoodTypeFilter");
     const foodTypeFilter = filterEl ? filterEl.value : "all";
 
-    const mealFilter = bookingsMealFilterValue;
-
     fetch(`${API}/admin/bookings/today`)
     .then(res => res.json())
     .then(data => {
         if (foodTypeFilter !== "all") {
             data = data.filter(b => b.selected_food_type === foodTypeFilter);
         }
-        if (mealFilter !== "all") {
-            data = data.filter(b => b.meal_type === mealFilter);
-        }
-
-        const countEl = document.getElementById("bookingsTiffinCount");
-        if (countEl) countEl.textContent = `Tiffins = ${data.length}`;
 
         if (!data.length) {
             container.innerHTML = '<p class="empty">No booking requests today.</p>';
