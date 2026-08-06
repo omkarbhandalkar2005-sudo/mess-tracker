@@ -558,6 +558,12 @@ function loadTodayTiffinList() {
     fetch(`${API}/tiffin-by-date/${date}`)
     .then(res => res.json())
     .then(data => {
+        const countEl = document.getElementById("todayTiffinCount");
+        if (countEl) {
+            const total = data.reduce((sum, t) => sum + (Number(t.quantity) || 0), 0);
+            countEl.textContent = `Tiffins = ${total}`;
+        }
+
         container.innerHTML = renderTable(data, [
             { key: "name", label: "Customer" },
             { key: "type", label: "Type" },
