@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="My Mess home — manage tiffin bookings, payments, and billing.">
-    <title>Bill Summary — My Mess</title>
+    <title>Daily Tiffins History — My Mess</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="My Mess" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=7">
     <script>
         document.documentElement.className =
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
     </script>
 </head>
-<body data-page="bill-summary">
+<body data-page="daily-tiffins-history">
 
 <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-brand">
@@ -100,55 +100,29 @@
     </aside>
 <main class="page">
     <header class="page-header">
-        <h1>Bill Summary</h1>
-        <p id="pageSubtitle">View bill details for a customer</p>
+        <h1>Daily Tiffins History</h1>
+        <p id="pageSubtitle">View every tiffin entry for a date, across all customers</p>
     </header>
 
     <div class="grid">
 
-        <!-- Bill -->
-        <section class="card" aria-labelledby="billHeading">
-            <div class="card-header month-filter-header">
-                <div class="month-filter-title">
-                    <div class="card-icon amber" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                        </svg>
-                    </div>
-                    <h2 id="billHeading">Bill Summary</h2>
+        <!-- Daily Tiffins History (Admin) -->
+        <section class="card grid-full admin-only" aria-labelledby="dailyTiffinsHistoryHeading">
+            <div class="card-header">
+                <div class="card-icon" aria-hidden="true">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                    </svg>
                 </div>
-                <label class="month-filter-label" for="billMonthFilter">
-                    <span class="sr-only">Select month</span>
-                    <input type="month" id="billMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onBillMonthChange()">
-                </label>
+                <h2 id="dailyTiffinsHistoryHeading">Daily Tiffins History</h2>
             </div>
 
-            <div class="form-group admin-only" id="billLookupGroup">
-                <label for="bill_customer_id_search">Customer</label>
-                <div class="customer-selector">
-                    <input type="text" id="bill_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="bill_customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="bill_customer_id">
-                    <ul class="customer-selector-list" id="bill_customer_id_list" role="listbox" hidden></ul>
-                </div>
+            <div class="form-group">
+                <label for="dailyTiffinsDate">Date</label>
+                <input type="date" id="dailyTiffinsDate" onchange="loadDailyTiffinsHistory()">
             </div>
 
-            <button class="btn btn-primary admin-only" onclick="getBill()">View Bill</button>
-            <div id="bill_result" aria-live="polite"></div>
-
-            <!-- UPI Pay Button - Customer Only -->
-            <div class="customer-only" id="payNowSection" style="margin-top: 1rem; display: none;">
-                <button class="btn btn-primary" onclick="toggleQR()" id="payNowBtn">
-                    💳 Pay via UPI
-                </button>
-
-                <div id="qrSection" class="qr-section" style="display: none;">
-                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-code-img">
-                    <p class="qr-upi-id">UPI ID: <strong>9021081442@axl</strong></p>
-                    <p class="qr-instruction">You can scan QR code using any UPI app</p>
-                    <p class="qr-warning">⚠️ Admin will record after payment</p>
-                </div>
-            </div>
+            <div id="dailyTiffinsHistoryList" aria-live="polite"></div>
         </section>
 
         <!-- Customer profile (modal) -->
@@ -197,17 +171,15 @@
 
 <script src="app.js?v=9"></script>
 <script>
-    function initBillSummary() {
+    function initDailyTiffinsHistory() {
         initCommon();
         if (isAdmin()) {
-            initCustomerSelector("bill_customer_id");
-        } else {
-            document.getElementById("payNowSection").style.display = "block";
-            getBill();
+            setDailyTiffinsDefaults();
+            loadDailyTiffinsHistory();
         }
     }
 
-    initBillSummary();
+    initDailyTiffinsHistory();
 </script>
 
 </body>

@@ -558,12 +558,6 @@ function loadTodayTiffinList() {
     fetch(`${API}/tiffin-by-date/${date}`)
     .then(res => res.json())
     .then(data => {
-        const countEl = document.getElementById("todayTiffinCount");
-        if (countEl) {
-            const total = data.reduce((sum, t) => sum + (Number(t.quantity) || 0), 0);
-            countEl.textContent = `Tiffins = ${total}`;
-        }
-
         container.innerHTML = renderTable(data, [
             { key: "name", label: "Customer" },
             { key: "type", label: "Type" },
@@ -585,6 +579,55 @@ function deleteTodayTiffin(id) {
     .then(res => res.json())
     .then(() => {
         loadTodayTiffinList();
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Delete failed. Please try again.");
+    });
+}
+
+// ── Daily Tiffins History (own page) ──
+// Same idea and same table shape as "Today's Tiffins" above — every
+// customer's entry for one selected date — just living on its own page
+// with its own date field instead of piggybacking on the Add Tiffin form.
+function setDailyTiffinsDefaults() {
+    const dateField = document.getElementById("dailyTiffinsDate");
+    if (dateField && !dateField.value) dateField.value = getTodayLocalDate();
+}
+
+function loadDailyTiffinsHistory() {
+    const container = document.getElementById("dailyTiffinsHistoryList");
+    if (!container) return;
+
+    const dateField = document.getElementById("dailyTiffinsDate");
+    const date = (dateField && dateField.value) || getTodayLocalDate();
+
+    container.innerHTML = '<p class="empty">Loading...</p>';
+
+    fetch(`${API}/tiffin-by-date/${date}`)
+    .then(res => res.json())
+    .then(data => {
+        container.innerHTML = renderTable(data, [
+            { key: "name", label: "Customer" },
+            { key: "type", label: "Type" },
+            { key: "quantity", label: "Qty" },
+            { key: "extra_roti", label: "Chapati" },
+            { key: "extra_bhakari", label: "Bhakari" }
+        ], isAdmin() ? "deleteDailyTiffin" : null);
+    })
+    .catch(err => {
+        console.error(err);
+        container.innerHTML = '<p class="empty">Failed to load tiffins history.</p>';
+    });
+}
+
+function deleteDailyTiffin(id) {
+    if (!confirm("Ye tiffin entry delete karni hai? Ye action undo nahi ho sakta.")) return;
+
+    fetch(`${API}/tiffin/${id}`, { method: "DELETE" })
+    .then(res => res.json())
+    .then(() => {
+        loadDailyTiffinsHistory();
     })
     .catch(err => {
         console.error(err);
