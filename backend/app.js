@@ -611,21 +611,24 @@ app.get('/all-customers-summary', (req, res) => {
                     const paymentMap = {};
                     paymentRows.forEach(row => { paymentMap[row.customer_id] = row.totalPaid || 0; });
 
-                    const summary = customers.map(c => {
-                        const t = tiffinMap[c.id] || {};
-                        const totalTiffin = Number(t.fastTiffin || 0) + Number(t.regularTiffin || 0);
+                    const summary = customers
+                        .map(c => {
+                            const t = tiffinMap[c.id] || {};
+                            const totalTiffin = Number(t.fastTiffin || 0) + Number(t.regularTiffin || 0);
 
-                        const totalAmount =
-                            (t.regularTiffin || 0) * TIFFIN_PRICE  +
-                            (t.fastTiffin    || 0) * FAST_PRICE    +
-                            (t.totalChapati     || 0) * CHAPATI_PRICE    +
-                            (t.totalBhakari  || 0) * BHAKARI_PRICE;
+                            const totalAmount =
+                                (t.regularTiffin || 0) * TIFFIN_PRICE  +
+                                (t.fastTiffin    || 0) * FAST_PRICE    +
+                                (t.totalChapati     || 0) * CHAPATI_PRICE    +
+                                (t.totalBhakari  || 0) * BHAKARI_PRICE;
 
-                        const totalPaid = paymentMap[c.id] || 0;
-                        const pending   = totalAmount - totalPaid;
+                            const totalPaid = paymentMap[c.id] || 0;
+                            const pending   = totalAmount - totalPaid;
 
-                        return { id: c.id, name: c.name, totalTiffin, totalAmount, totalPaid, pending };
-                    });
+                            return { id: c.id, name: c.name, totalTiffin, totalAmount, totalPaid, pending };
+                        })
+                        // Customers with no tiffins at all shouldn't clutter the list
+                        .filter(row => row.totalTiffin > 0);
 
                     res.status(200).json(summary);
                 });
@@ -680,21 +683,24 @@ app.get('/all-customers-summary', (req, res) => {
 
                 const key = `${Number(year)}-${Number(month)}`;
 
-                const summary = customers.map(c => {
-                    const ledger = buildMonthlyLedger(rowsByCustomer[c.id] || [], paidPoolMap[c.id] || 0);
-                    const entry  = ledger.get(key) || {
-                        totalTiffin: 0, extraChapati: 0, extraBhakari: 0, totalAmount: 0, paid: 0, pending: 0
-                    };
+                const summary = customers
+                    .map(c => {
+                        const ledger = buildMonthlyLedger(rowsByCustomer[c.id] || [], paidPoolMap[c.id] || 0);
+                        const entry  = ledger.get(key) || {
+                            totalTiffin: 0, extraChapati: 0, extraBhakari: 0, totalAmount: 0, paid: 0, pending: 0
+                        };
 
-                    return {
-                        id: c.id,
-                        name: c.name,
-                        totalTiffin: entry.totalTiffin,
-                        totalAmount: entry.totalAmount,
-                        totalPaid:   entry.paid,
-                        pending:     entry.pending
-                    };
-                });
+                        return {
+                            id: c.id,
+                            name: c.name,
+                            totalTiffin: entry.totalTiffin,
+                            totalAmount: entry.totalAmount,
+                            totalPaid:   entry.paid,
+                            pending:     entry.pending
+                        };
+                    })
+                    // Customers with no tiffins in the selected month shouldn't clutter the list
+                    .filter(row => row.totalTiffin > 0);
 
                 res.status(200).json(summary);
             });
