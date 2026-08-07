@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="My Mess home — manage tiffin bookings, payments, and billing.">
-    <title>Add Tiffin — My Mess</title>
+    <title>Monthly Summary — My Mess</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="My Mess" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="stylesheet" href="styles.css?v=2">
     <script>
         document.documentElement.className =
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
     </script>
 </head>
-<body data-page="add-tiffin">
+<body data-page="monthly-summary">
 
 <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-brand">
@@ -77,6 +77,13 @@
                 </svg>
                 <span>Bill Summary</span>
             </a>
+            <a href="customers-list.html" class="sidebar-link admin-only" data-page="customers-list" onclick="closeSidebar()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/>
+                    <path d="M15 8h3M15 12h3M6 17c.5-1.5 2-2 3-2s2.5.5 3 2"/>
+                </svg>
+                <span>Customers Info</span>
+            </a>
             <a href="record-payment.html" class="sidebar-link admin-only" data-page="record-payment" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -94,91 +101,30 @@
     </aside>
 <main class="page">
     <header class="page-header">
-        <h1>Add Tiffin</h1>
-        <p id="pageSubtitle">Add a tiffin entry for a customer</p>
+        <h1>Monthly Summary</h1>
+        <p id="pageSubtitle">View monthly billing summary for all customers.</p>
     </header>
 
     <div class="grid">
 
-        <!-- Add Tiffin (Admin) -->
-        <section class="card admin-only" id="addSection" aria-labelledby="addTiffinHeading">
-            <div class="card-header">
-                <div class="card-icon" aria-hidden="true">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-                    </svg>
-                </div>
-                <h2 id="addTiffinHeading">Add Tiffin</h2>
-            </div>
-
-            <div class="form-group">
-                <label for="customer_id_search">Customer</label>
-                <div class="customer-selector">
-                    <input type="text" id="customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="customer_id">
-                    <ul class="customer-selector-list" id="customer_id_list" role="listbox" hidden></ul>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="date">Date</label>
-                    <input type="date" id="date" onchange="loadTodayTiffinList()">
-                </div>
-                <div class="form-group">
-                    <label for="type">Food Type</label>
-                    <select id="type">
-                        <option>Veg</option>
-                        <option>Non-Veg</option>
-                        <option>Fast</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="quantity">Tiffin quantity</label>
-                <div class="stepper" role="group" aria-labelledby="quantity-label">
-                    <button type="button" class="stepper-btn" aria-label="Decrease tiffin quantity" onclick="stepValue('quantity', -1)">&minus;</button>
-                    <input type="number" id="quantity" class="stepper-value" value="1" min="0" inputmode="numeric">
-                    <button type="button" class="stepper-btn" aria-label="Increase tiffin quantity" onclick="stepValue('quantity', 1)">+</button>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="extra_roti">Extra Chapati</label>
-                    <div class="stepper" role="group">
-                        <button type="button" class="stepper-btn" aria-label="Decrease extra chapati" onclick="stepValue('extra_roti', -1)">&minus;</button>
-                        <input type="number" id="extra_roti" class="stepper-value" value="0" min="0" inputmode="numeric">
-                        <button type="button" class="stepper-btn" aria-label="Increase extra chapati" onclick="stepValue('extra_roti', 1)">+</button>
+        <!-- All Customers (Admin) -->
+        <section class="card grid-full admin-only" id="allCustomersSection" aria-labelledby="allCustomersHeading">
+            <div class="card-header month-filter-header">
+                <div class="month-filter-title">
+                    <div class="card-icon" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
                     </div>
+                    <h2 id="allCustomersHeading">All Customers</h2>
                 </div>
-                <div class="form-group">
-                    <label for="extra_bhakari">Extra Bhakari</label>
-                    <div class="stepper" role="group">
-                        <button type="button" class="stepper-btn" aria-label="Decrease extra bhakari" onclick="stepValue('extra_bhakari', -1)">&minus;</button>
-                        <input type="number" id="extra_bhakari" class="stepper-value" value="0" min="0" inputmode="numeric">
-                        <button type="button" class="stepper-btn" aria-label="Increase extra bhakari" onclick="stepValue('extra_bhakari', 1)">+</button>
-                    </div>
-                </div>
+                <label class="month-filter-label" for="allCustomersMonthFilter">
+                    <span class="sr-only">Select month</span>
+                    <input type="month" id="allCustomersMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onAllCustomersMonthChange()">
+                </label>
             </div>
-
-            <button class="btn btn-primary" id="addBtn" onclick="addTiffin()">Add Tiffin</button>
-            <div id="result" aria-live="polite"></div>
-        </section>
-
-        <!-- Today's Tiffins (Admin) -->
-        <section class="card grid-full admin-only" id="todayTiffinSection" aria-labelledby="todayTiffinHeading">
-            <div class="card-header">
-                <div class="card-icon" aria-hidden="true">
-                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-                    </svg>
-                </div>
-                <h2 id="todayTiffinHeading">Today's Tiffins</h2>
-                <span class="tiffin-count-badge" id="todayTiffinCount" aria-live="polite">Tiffins = 0</span>
-            </div>
-            <div id="todayTiffinList" aria-live="polite"></div>
+            <div id="allCustomersList" aria-live="polite"></div>
         </section>
 
         <!-- Customer profile (modal) -->
@@ -225,18 +171,17 @@
 </main>
 </div>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 <script>
-    function initAddTiffin() {
+    function initCustomers() {
         initCommon();
+
         if (isAdmin()) {
-            setAddTiffinDefaults();
-            initCustomerSelector("customer_id");
-            loadTodayTiffinList();
+            loadAllCustomers();
         }
     }
 
-    initAddTiffin();
+    initCustomers();
 </script>
 
 </body>

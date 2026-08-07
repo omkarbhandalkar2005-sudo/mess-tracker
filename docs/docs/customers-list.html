@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="My Mess home — manage tiffin bookings, payments, and billing.">
-    <title>Record Payment — My Mess</title>
+    <title>Customers Info — My Mess</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="My Mess" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=7">
     <script>
         document.documentElement.className =
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
     </script>
 </head>
-<body data-page="record-payment">
+<body data-page="customers-list">
 
 <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-brand">
@@ -77,6 +77,13 @@
                 </svg>
                 <span>Bill Summary</span>
             </a>
+            <a href="customers-list.html" class="sidebar-link admin-only" data-page="customers-list" onclick="closeSidebar()">
+                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/>
+                    <path d="M15 8h3M15 12h3M6 17c.5-1.5 2-2 3-2s2.5.5 3 2"/>
+                </svg>
+                <span>Customers Info</span>
+            </a>
             <a href="record-payment.html" class="sidebar-link admin-only" data-page="record-payment" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -94,45 +101,31 @@
     </aside>
 <main class="page">
     <header class="page-header">
-        <h1>Record Payment</h1>
-        <p id="pageSubtitle">Record a payment for a customer</p>
+        <h1>Customers Info</h1>
+        <p id="pageSubtitle">View all registered customers and their contact details</p>
     </header>
 
     <div class="grid">
 
-        <!-- Record Payment (Admin) -->
-        <section class="card admin-only" id="paymentSection" aria-labelledby="paymentHeading">
+        <!-- Customers Info (Admin) -->
+        <section class="card grid-full admin-only" aria-labelledby="customersListHeading">
             <div class="card-header">
-                <div class="card-icon purple" aria-hidden="true">
+                <div class="card-icon" aria-hidden="true">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                        <rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/>
+                        <path d="M15 8h3M15 12h3M6 17c.5-1.5 2-2 3-2s2.5.5 3 2"/>
                     </svg>
                 </div>
-                <h2 id="paymentHeading">Record Payment</h2>
+                <h2 id="customersListHeading">Customers Info</h2>
+                <span class="tiffin-count-badge" id="customersListCount" aria-live="polite">Total Customers = 0</span>
             </div>
 
             <div class="form-group">
-                <label for="pay_customer_id_search">Customer</label>
-                <div class="customer-selector">
-                    <input type="text" id="pay_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="pay_customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="pay_customer_id">
-                    <ul class="customer-selector-list" id="pay_customer_id_list" role="listbox" hidden></ul>
-                </div>
+                <label for="customersListSearch">Search</label>
+                <input type="text" id="customersListSearch" placeholder="Search by Customer ID, Name or Phone Number..." autocomplete="off" oninput="filterCustomersList()">
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="amount_paid">Amount (₹)</label>
-                    <input type="number" id="amount_paid" placeholder="0" min="0">
-                </div>
-                <div class="form-group">
-                    <label for="pay_date">Payment date</label>
-                    <input type="date" id="pay_date">
-                </div>
-            </div>
-
-            <button class="btn btn-primary" id="payBtn" onclick="addPayment()">Record Payment</button>
-            <div id="pay_result" aria-live="polite"></div>
+            <div id="customersListContainer" aria-live="polite"></div>
         </section>
 
         <!-- Customer profile (modal) -->
@@ -179,15 +172,16 @@
 </main>
 </div>
 
-<script src="app.js?v=12"></script>
+<script src="app.js?v=13"></script>
 <script>
-    function initRecordPayment() {
+    function initCustomersList() {
         initCommon();
-        setRecordPaymentDefaults();
-        initCustomerSelector("pay_customer_id");
+        if (isAdmin()) {
+            loadCustomersList();
+        }
     }
 
-    initRecordPayment();
+    initCustomersList();
 </script>
 
 </body>

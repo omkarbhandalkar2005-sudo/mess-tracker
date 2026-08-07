@@ -286,12 +286,14 @@ app.post('/forgot-password/reset', (req, res) => {
     });
 });
 
-// CUSTOMER DIRECTORY (lightweight — id + name only, for the searchable
-// customer selector used across Add Tiffin, Record Payment, Bill Summary
-// and Activity History). Reuses the same role='customer' filter as
-// /api/monthly-summary, just without the billing joins.
+// CUSTOMER DIRECTORY (id + name + contact, for the searchable customer
+// selector used across Add Tiffin, Record Payment, Bill Summary and
+// Activity History, and for the admin-only Customers Info page). Reuses
+// the same role='customer' filter as /api/monthly-summary, just without
+// the billing joins. `contact` was added for Customers Info — existing
+// consumers only ever read `id`/`name`, so this is additive and safe.
 app.get('/api/customers', (req, res) => {
-    db.query("SELECT id, name FROM customers WHERE role = 'customer' ORDER BY id ASC", (err, result) => {
+    db.query("SELECT id, name, contact FROM customers WHERE role = 'customer' ORDER BY id ASC", (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ message: "Error fetching customers" });

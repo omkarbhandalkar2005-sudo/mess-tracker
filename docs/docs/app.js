@@ -114,6 +114,84 @@ function loadAllCustomers() {
     });
 }
 
+// ── Customers Info (admin-only customer directory page) ──
+// Reuses the same /api/customers endpoint as the searchable customer
+// selector (now extended server-side to also return `contact`), but keeps
+// its own fetch + cache so this page's ID-ascending order isn't affected
+// by the name-sorted cache used by initCustomerSelector.
+let customersListData = null;
+
+function loadCustomersList() {
+    const container = document.getElementById("customersListContainer");
+    if (!container) return;
+    container.innerHTML = '<p class="empty">Loading...</p>';
+
+    fetch(`${API}/api/customers`)
+    .then(res => {
+        if (!res.ok) throw new Error(`Request failed: ${res.status}`);
+        return res.json();
+    })
+    .then(data => {
+        customersListData = Array.isArray(data) ? data : [];
+        renderCustomersListTable(customersListData);
+    })
+    .catch(err => {
+        console.error(err);
+        customersListData = null;
+        container.innerHTML = '<p class="empty">Failed to load customers list.</p>';
+    });
+}
+
+function filterCustomersList() {
+    if (!customersListData) return; // still loading / failed — nothing to filter yet
+
+    const searchEl = document.getElementById("customersListSearch");
+    const query = (searchEl && searchEl.value || "").trim().toLowerCase();
+
+    if (!query) {
+        renderCustomersListTable(customersListData);
+        return;
+    }
+
+    const filtered = customersListData.filter(c =>
+        String(c.id).toLowerCase().includes(query) ||
+        String(c.name || "").toLowerCase().includes(query) ||
+        String(c.contact || "").toLowerCase().includes(query)
+    );
+    renderCustomersListTable(filtered);
+}
+
+function renderCustomersListTable(list) {
+    const container = document.getElementById("customersListContainer");
+    const countBadge = document.getElementById("customersListCount");
+    if (!container) return;
+
+    // The badge always reflects the total registered customer count, not
+    // the number of rows currently visible after a search filter.
+    if (countBadge) {
+        const total = customersListData ? customersListData.length : list.length;
+        countBadge.innerText = `Total Customers = ${total}`;
+    }
+
+    if (!list.length) {
+        container.innerHTML = '<p class="empty">No customers found.</p>';
+        return;
+    }
+
+    const rows = list.map(c => `<tr>
+        <td>${c.id}</td>
+        <td>${c.name}</td>
+        <td>${c.contact ?? "—"}</td>
+    </tr>`).join("");
+
+    container.innerHTML = `<div class="table-wrap"><table>
+        <thead><tr>
+            <th>Customer ID</th><th>Customer Name</th><th>Phone Number</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+    </table></div>`;
+}
+
 // ── Reusable searchable customer selector (combobox) ──
 // Used on Add Tiffin, Record Payment, Bill Summary and Activity History
 // wherever an admin used to type a raw customer ID. Markup convention for
