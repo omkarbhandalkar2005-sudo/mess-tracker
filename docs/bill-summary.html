@@ -90,18 +90,12 @@
                 </svg>
                 <span>Customers</span>
             </a>
-            <a href="activity-history.html" class="sidebar-link" data-page="activity-history" onclick="closeSidebar()">
-                <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                </svg>
-                <span>Activity History</span>
-            </a>
         </nav>
     </aside>
 <main class="page">
     <header class="page-header">
         <h1>Bill Summary</h1>
-        <p id="pageSubtitle">View bill details for a customer</p>
+        <p id="pageSubtitle">View bill details and activity history for a customer</p>
     </header>
 
     <div class="grid">
@@ -151,6 +145,46 @@
             </div>
         </section>
 
+        <!-- History -->
+        <section class="card grid-full" aria-labelledby="historyHeading">
+            <div class="card-header month-filter-header">
+                <div class="month-filter-title">
+                    <div class="card-icon blue" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <h2 id="historyHeading">Activity History</h2>
+                </div>
+                <label class="month-filter-label" for="historyMonthFilter">
+                    <span class="sr-only">Select month</span>
+                    <input type="month" id="historyMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onHistoryMonthChange()">
+                </label>
+            </div>
+
+            <div class="history-toolbar admin-only" id="historyLookupGroup">
+                <div class="customer-selector">
+                    <input type="text" id="history_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="history_customer_id_list" aria-label="Search customer by name or ID">
+                    <input type="hidden" id="history_customer_id">
+                    <ul class="customer-selector-list" id="history_customer_id_list" role="listbox" hidden></ul>
+                </div>
+                <button class="btn btn-primary" onclick="loadHistory()">Load History</button>
+            </div>
+
+            <div class="history-tabs" role="tablist" aria-label="Activity History records">
+                <button type="button" class="history-tab active" id="tiffinTabBtn" role="tab" aria-selected="true" aria-controls="tiffin_history_panel" onclick="switchHistoryTab('tiffin')">Tiffin Records</button>
+                <button type="button" class="history-tab" id="paymentTabBtn" role="tab" aria-selected="false" aria-controls="payment_history_panel" onclick="switchHistoryTab('payment')">Payment Records</button>
+            </div>
+
+            <div id="tiffin_history_panel" class="history-panel" role="tabpanel" aria-labelledby="tiffinTabBtn">
+                <div id="tiffin_history" aria-live="polite"></div>
+            </div>
+
+            <div id="payment_history_panel" class="history-panel" role="tabpanel" aria-labelledby="paymentTabBtn" hidden>
+                <div id="payment_history" aria-live="polite"></div>
+            </div>
+        </section>
+
         <!-- Customer profile (modal) -->
         <div class="modal-overlay" id="accountModal" onclick="if(event.target===this) closeAccountModal()">
             <section class="card modal-box" id="customerIdSection" role="dialog" aria-modal="true" aria-labelledby="accountHeading" tabindex="-1">
@@ -195,15 +229,17 @@
 </main>
 </div>
 
-<script src="app.js?v=9"></script>
+<script src="app.js?v=11"></script>
 <script>
     function initBillSummary() {
         initCommon();
         if (isAdmin()) {
             initCustomerSelector("bill_customer_id");
+            initCustomerSelector("history_customer_id");
         } else {
             document.getElementById("payNowSection").style.display = "block";
             getBill();
+            loadHistory();
         }
     }
 
