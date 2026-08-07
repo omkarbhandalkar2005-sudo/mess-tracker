@@ -67,7 +67,7 @@ function loadAllCustomers() {
     if (!container) return;
     container.innerHTML = '<p class="empty">Loading...</p>';
 
-    fetch(`${API}/all-customers-summary${monthYearQuery("allCustomersMonthFilter")}`)
+    fetch(`${API}/api/monthly-summary${monthYearQuery("allCustomersMonthFilter")}`)
     .then(res => res.json())
     .then(data => {
         if (!data.length) {
@@ -137,7 +137,7 @@ function loadCustomerDirectory() {
     if (customerDirectoryCache) return Promise.resolve(customerDirectoryCache);
     if (customerDirectoryPromise) return customerDirectoryPromise;
 
-    customerDirectoryPromise = fetch(`${API}/customers`)
+    customerDirectoryPromise = fetch(`${API}/api/customers`)
         .then(res => {
             if (!res.ok) throw new Error(`Request failed: ${res.status}`);
             return res.json();

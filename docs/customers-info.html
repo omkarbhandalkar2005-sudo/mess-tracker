@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="My Mess home — manage tiffin bookings, payments, and billing.">
-    <title>Customers — My Mess</title>
+    <title>Bill Summary — My Mess</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -17,7 +17,7 @@
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
     </script>
 </head>
-<body data-page="customers">
+<body data-page="customers-info">
 
 <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-brand">
@@ -52,7 +52,7 @@
             </button>
         </div>
         <nav class="sidebar-nav">
-            <a href="index.html" class="sidebar-link" data-page="home" onclick="closeSidebar()">
+            <a href="home.html" class="sidebar-link" data-page="home" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
@@ -70,7 +70,7 @@
                 </svg>
                 <span>Daily Tiffins History</span>
             </a>
-            <a href="bill-summary.html" class="sidebar-link" data-page="bill-summary" onclick="closeSidebar()">
+            <a href="customers-info.html" class="sidebar-link" data-page="customers-info" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
@@ -83,41 +83,106 @@
                 </svg>
                 <span>Record Payment</span>
             </a>
-            <a href="customers.html" class="sidebar-link admin-only" data-page="customers" onclick="closeSidebar()">
+            <a href="monthly-summary.html" class="sidebar-link admin-only" data-page="monthly-summary" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
-                <span>Customers</span>
+                <span>Monthly Summary</span>
             </a>
         </nav>
     </aside>
 <main class="page">
     <header class="page-header">
-        <h1>Customers</h1>
-        <p id="pageSubtitle">View all customers and their billing summary</p>
+        <h1>Bill Summary</h1>
+        <p id="pageSubtitle">View bill details and activity history for a customer</p>
     </header>
 
     <div class="grid">
 
-        <!-- All Customers (Admin) -->
-        <section class="card grid-full admin-only" id="allCustomersSection" aria-labelledby="allCustomersHeading">
+        <!-- Bill -->
+        <section class="card" aria-labelledby="billHeading">
             <div class="card-header month-filter-header">
                 <div class="month-filter-title">
-                    <div class="card-icon" aria-hidden="true">
+                    <div class="card-icon amber" aria-hidden="true">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
                         </svg>
                     </div>
-                    <h2 id="allCustomersHeading">All Customers</h2>
+                    <h2 id="billHeading">Bill Summary</h2>
                 </div>
-                <label class="month-filter-label" for="allCustomersMonthFilter">
+                <label class="month-filter-label" for="billMonthFilter">
                     <span class="sr-only">Select month</span>
-                    <input type="month" id="allCustomersMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onAllCustomersMonthChange()">
+                    <input type="month" id="billMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onBillMonthChange()">
                 </label>
             </div>
-            <div id="allCustomersList" aria-live="polite"></div>
+
+            <div class="form-group admin-only" id="billLookupGroup">
+                <label for="bill_customer_id_search">Customer</label>
+                <div class="customer-selector">
+                    <input type="text" id="bill_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="bill_customer_id_list" aria-label="Search customer by name or ID">
+                    <input type="hidden" id="bill_customer_id">
+                    <ul class="customer-selector-list" id="bill_customer_id_list" role="listbox" hidden></ul>
+                </div>
+            </div>
+
+            <button class="btn btn-primary admin-only" onclick="getBill()">View Bill</button>
+            <div id="bill_result" aria-live="polite"></div>
+
+            <!-- UPI Pay Button - Customer Only -->
+            <div class="customer-only" id="payNowSection" style="margin-top: 1rem; display: none;">
+                <button class="btn btn-primary" onclick="toggleQR()" id="payNowBtn">
+                    💳 Pay via UPI
+                </button>
+
+                <div id="qrSection" class="qr-section" style="display: none;">
+                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-code-img">
+                    <p class="qr-upi-id">UPI ID: <strong>9021081442@axl</strong></p>
+                    <p class="qr-instruction">You can scan QR code using any UPI app</p>
+                    <p class="qr-warning">⚠️ Admin will record after payment</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- History -->
+        <section class="card grid-full" aria-labelledby="historyHeading">
+            <div class="card-header month-filter-header">
+                <div class="month-filter-title">
+                    <div class="card-icon blue" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                    </div>
+                    <h2 id="historyHeading">Activity History</h2>
+                </div>
+                <label class="month-filter-label" for="historyMonthFilter">
+                    <span class="sr-only">Select month</span>
+                    <input type="month" id="historyMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onHistoryMonthChange()">
+                </label>
+            </div>
+
+            <div class="history-toolbar admin-only" id="historyLookupGroup">
+                <div class="customer-selector">
+                    <input type="text" id="history_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="history_customer_id_list" aria-label="Search customer by name or ID">
+                    <input type="hidden" id="history_customer_id">
+                    <ul class="customer-selector-list" id="history_customer_id_list" role="listbox" hidden></ul>
+                </div>
+                <button class="btn btn-primary" onclick="loadHistory()">Load History</button>
+            </div>
+
+            <div class="history-tabs" role="tablist" aria-label="Activity History records">
+                <button type="button" class="history-tab active" id="tiffinTabBtn" role="tab" aria-selected="true" aria-controls="tiffin_history_panel" onclick="switchHistoryTab('tiffin')">Tiffin Records</button>
+                <button type="button" class="history-tab" id="paymentTabBtn" role="tab" aria-selected="false" aria-controls="payment_history_panel" onclick="switchHistoryTab('payment')">Payment Records</button>
+            </div>
+
+            <div id="tiffin_history_panel" class="history-panel" role="tabpanel" aria-labelledby="tiffinTabBtn">
+                <div id="tiffin_history" aria-live="polite"></div>
+            </div>
+
+            <div id="payment_history_panel" class="history-panel" role="tabpanel" aria-labelledby="paymentTabBtn" hidden>
+                <div id="payment_history" aria-live="polite"></div>
+            </div>
         </section>
 
         <!-- Customer profile (modal) -->
@@ -164,17 +229,21 @@
 </main>
 </div>
 
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 <script>
-    function initCustomers() {
+    function initBillSummary() {
         initCommon();
-
         if (isAdmin()) {
-            loadAllCustomers();
+            initCustomerSelector("bill_customer_id");
+            initCustomerSelector("history_customer_id");
+        } else {
+            document.getElementById("payNowSection").style.display = "block";
+            getBill();
+            loadHistory();
         }
     }
 
-    initCustomers();
+    initBillSummary();
 </script>
 
 </body>

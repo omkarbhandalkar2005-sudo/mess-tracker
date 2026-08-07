@@ -289,8 +289,8 @@ app.post('/forgot-password/reset', (req, res) => {
 // CUSTOMER DIRECTORY (lightweight — id + name only, for the searchable
 // customer selector used across Add Tiffin, Record Payment, Bill Summary
 // and Activity History). Reuses the same role='customer' filter as
-// /all-customers-summary, just without the billing joins.
-app.get('/customers', (req, res) => {
+// /api/monthly-summary, just without the billing joins.
+app.get('/api/customers', (req, res) => {
     db.query("SELECT id, name FROM customers WHERE role = 'customer' ORDER BY id ASC", (err, result) => {
         if (err) {
             console.error(err);
@@ -567,7 +567,7 @@ app.get('/final-bill/:id', (req, res) => {
 });
 
 // ALL CUSTOMERS SUMMARY (Admin list — name, id, total tiffins, total bill)
-app.get('/all-customers-summary', (req, res) => {
+app.get('/api/monthly-summary', (req, res) => {
     const { month, year } = req.query;
     const hasFilter = month && year;
 

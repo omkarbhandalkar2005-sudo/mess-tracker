@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="My Mess home — manage tiffin bookings, payments, and billing.">
-    <title>Bill Summary — My Mess</title>
+    <title>Home — My Mess</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="My Mess" />
     <link rel="manifest" href="/site.webmanifest" />
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=7">
     <script>
         document.documentElement.className =
             "role-" + (localStorage.getItem("role") || "customer").toLowerCase().trim();
     </script>
 </head>
-<body data-page="bill-summary">
+<body data-page="home">
 
 <nav class="navbar" aria-label="Main navigation">
     <div class="navbar-brand">
@@ -52,7 +52,7 @@
             </button>
         </div>
         <nav class="sidebar-nav">
-            <a href="index.html" class="sidebar-link" data-page="home" onclick="closeSidebar()">
+            <a href="home.html" class="sidebar-link" data-page="home" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
                 </svg>
@@ -70,7 +70,7 @@
                 </svg>
                 <span>Daily Tiffins History</span>
             </a>
-            <a href="bill-summary.html" class="sidebar-link" data-page="bill-summary" onclick="closeSidebar()">
+            <a href="customers-info.html" class="sidebar-link" data-page="customers-info" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
@@ -83,105 +83,68 @@
                 </svg>
                 <span>Record Payment</span>
             </a>
-            <a href="customers.html" class="sidebar-link admin-only" data-page="customers" onclick="closeSidebar()">
+            <a href="monthly-summary.html" class="sidebar-link admin-only" data-page="monthly-summary" onclick="closeSidebar()">
                 <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                     <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                 </svg>
-                <span>Customers</span>
+                <span>Monthly Summary</span>
             </a>
         </nav>
     </aside>
 <main class="page">
     <header class="page-header">
-        <h1>Bill Summary</h1>
-        <p id="pageSubtitle">View bill details and activity history for a customer</p>
+        <h1>Home</h1>
+        <p id="pageSubtitle">Manage tiffins and today's menu</p>
     </header>
 
     <div class="grid">
 
-        <!-- Bill -->
-        <section class="card" aria-labelledby="billHeading">
+        <!-- Today's Booking Requests (Admin) -->
+        <section class="card grid-full admin-only" id="bookingsSection" aria-labelledby="bookingsHeading">
             <div class="card-header month-filter-header">
                 <div class="month-filter-title">
                     <div class="card-icon amber" aria-hidden="true">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
+                            <path d="M3 2v7c0 1.1.9 2 2 2h1a2 2 0 0 0 2-2V2M7 2v20M17 2v20M17 2a5 5 0 0 1 0 10"/>
                         </svg>
                     </div>
-                    <h2 id="billHeading">Bill Summary</h2>
+                    <h2 id="bookingsHeading">Today's Booking Requests</h2>
                 </div>
-                <label class="month-filter-label" for="billMonthFilter">
-                    <span class="sr-only">Select month</span>
-                    <input type="month" id="billMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onBillMonthChange()">
-                </label>
-            </div>
-
-            <div class="form-group admin-only" id="billLookupGroup">
-                <label for="bill_customer_id_search">Customer</label>
-                <div class="customer-selector">
-                    <input type="text" id="bill_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="bill_customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="bill_customer_id">
-                    <ul class="customer-selector-list" id="bill_customer_id_list" role="listbox" hidden></ul>
-                </div>
-            </div>
-
-            <button class="btn btn-primary admin-only" onclick="getBill()">View Bill</button>
-            <div id="bill_result" aria-live="polite"></div>
-
-            <!-- UPI Pay Button - Customer Only -->
-            <div class="customer-only" id="payNowSection" style="margin-top: 1rem; display: none;">
-                <button class="btn btn-primary" onclick="toggleQR()" id="payNowBtn">
-                    💳 Pay via UPI
-                </button>
-
-                <div id="qrSection" class="qr-section" style="display: none;">
-                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-code-img">
-                    <p class="qr-upi-id">UPI ID: <strong>9021081442@axl</strong></p>
-                    <p class="qr-instruction">You can scan QR code using any UPI app</p>
-                    <p class="qr-warning">⚠️ Admin will record after payment</p>
+                <div class="month-filter-group">
+                    <div class="meal-filter-toggle" role="tablist" aria-label="Filter by meal">
+                        <button type="button" class="meal-filter-tab active" id="bookingsMealFilterLunch" role="tab" aria-selected="true" onclick="setBookingsMealFilter('Lunch')">☀️ Lunch</button>
+                        <button type="button" class="meal-filter-tab" id="bookingsMealFilterDinner" role="tab" aria-selected="false" onclick="setBookingsMealFilter('Dinner')">🌙 Dinner</button>
+                    </div>
+                    <span class="tiffin-count-badge" id="bookingsTiffinCount" aria-live="polite">Tiffins = 0</span>
+                    <label class="month-filter-label" for="bookingsFoodTypeFilter">
+                        <span class="sr-only">Filter by meal type</span>
+                        <select id="bookingsFoodTypeFilter" class="month-filter-input" aria-label="Filter by meal type" onchange="loadBookings()">
+                            <option value="all">All</option>
+                            <option value="Veg">Veg</option>
+                            <option value="Non-Veg">Non-Veg</option>
+                        </select>
+                    </label>
                 </div>
             </div>
+            <div id="bookingsList" aria-live="polite"></div>
         </section>
 
-        <!-- History -->
-        <section class="card grid-full" aria-labelledby="historyHeading">
-            <div class="card-header month-filter-header">
-                <div class="month-filter-title">
-                    <div class="card-icon blue" aria-hidden="true">
-                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                        </svg>
-                    </div>
-                    <h2 id="historyHeading">Activity History</h2>
+        <!-- Today's Meals (Customer) -->
+        <section class="card grid-full customer-only" id="todaysMealsSection" aria-labelledby="todaysMealsHeading">
+            <div class="card-header">
+                <div class="card-icon amber" aria-hidden="true">
+                    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M3 2v7c0 1.1.9 2 2 2h1a2 2 0 0 0 2-2V2M7 2v20M17 2v20M17 2a5 5 0 0 1 0 10"/>
+                    </svg>
                 </div>
-                <label class="month-filter-label" for="historyMonthFilter">
-                    <span class="sr-only">Select month</span>
-                    <input type="month" id="historyMonthFilter" class="month-filter-input" aria-label="Filter by month and year" onchange="onHistoryMonthChange()">
-                </label>
-            </div>
-
-            <div class="history-toolbar admin-only" id="historyLookupGroup">
-                <div class="customer-selector">
-                    <input type="text" id="history_customer_id_search" class="customer-selector-input" placeholder="Search customer by name or ID..." autocomplete="off" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-haspopup="listbox" aria-controls="history_customer_id_list" aria-label="Search customer by name or ID">
-                    <input type="hidden" id="history_customer_id">
-                    <ul class="customer-selector-list" id="history_customer_id_list" role="listbox" hidden></ul>
+                <div>
+                    <h2 id="todaysMealsHeading">Today's Meals</h2>
+                    <p class="subsection-title" id="todayDateLabel" style="margin: 0.125rem 0 0;">&nbsp;</p>
                 </div>
-                <button class="btn btn-primary" onclick="loadHistory()">Load History</button>
             </div>
-
-            <div class="history-tabs" role="tablist" aria-label="Activity History records">
-                <button type="button" class="history-tab active" id="tiffinTabBtn" role="tab" aria-selected="true" aria-controls="tiffin_history_panel" onclick="switchHistoryTab('tiffin')">Tiffin Records</button>
-                <button type="button" class="history-tab" id="paymentTabBtn" role="tab" aria-selected="false" aria-controls="payment_history_panel" onclick="switchHistoryTab('payment')">Payment Records</button>
-            </div>
-
-            <div id="tiffin_history_panel" class="history-panel" role="tabpanel" aria-labelledby="tiffinTabBtn">
-                <div id="tiffin_history" aria-live="polite"></div>
-            </div>
-
-            <div id="payment_history_panel" class="history-panel" role="tabpanel" aria-labelledby="paymentTabBtn" hidden>
-                <div id="payment_history" aria-live="polite"></div>
+            <div class="meals-grid" id="todaysMealsList" aria-live="polite">
+                <p class="empty">Loading...</p>
             </div>
         </section>
 
@@ -221,29 +184,113 @@
                         <div class="stat-value" id="display_email" style="font-size: var(--text-base);">—</div>
                     </div>
                 </div>
-                <button class="btn btn-ghost btn-sm btn-center-block" onclick="logout()">Sign Out</button>
+                <div style="text-align: center; margin-top: 1rem;">
+                    <button class="btn btn-ghost btn-sm btn-center-block" onclick="logout()">Sign Out</button>
+                </div>
             </section>
         </div>
+
+        <!-- Today's Menu (Admin) -->
+        <section class="card grid-full admin-only" id="menuManageSection" aria-labelledby="menuManageHeading">
+            <div class="card-header menu-manage-header">
+                <div class="menu-manage-title">
+                    <div class="card-icon blue" aria-hidden="true">
+                        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                    </div>
+                    <h2 id="menuManageHeading">Today's Menu</h2>
+                </div>
+
+                <div class="menu-manage-day">
+                    <select id="menuDaySelector" class="menu-day-selector" onchange="renderMenuDay(this.value)">
+                        <option>Monday</option>
+                        <option>Tuesday</option>
+                        <option>Wednesday</option>
+                        <option>Thursday</option>
+                        <option>Friday</option>
+                        <option>Saturday</option>
+                        <option>Sunday</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="menu-meal-toggle" role="tablist" aria-label="Meal type">
+                <button type="button" class="menu-meal-tab active" id="mealTabLunch" role="tab" aria-selected="true" onclick="setMealTab('lunch')">☀️ Lunch</button>
+                <button type="button" class="menu-meal-tab" id="mealTabDinner" role="tab" aria-selected="false" onclick="setMealTab('dinner')">🌙 Dinner</button>
+            </div>
+
+            <div class="menu-manage-body">
+                <div class="menu-simple-block" id="lunchFields">
+                    <div class="form-group">
+                        <label for="simple_lunch_text">Veg Menu</label>
+                        <textarea id="simple_lunch_text" rows="3" placeholder="e.g. Chapati, Rice, Dal, Sabzi, Salad"></textarea>
+                    </div>
+                    <div class="form-group menu-nonveg-toggle-row">
+                        <label for="simple_lunch_nonveg_toggle" class="menu-nonveg-toggle-label">
+                            <input type="checkbox" id="simple_lunch_nonveg_toggle" onchange="toggleNonVegField('lunch')">
+                            Enable Non-Veg Menu
+                        </label>
+                    </div>
+                    <div class="form-group" id="simple_lunch_nonveg_group" hidden>
+                        <label for="simple_lunch_nonveg_text">Non-Veg Menu</label>
+                        <textarea id="simple_lunch_nonveg_text" rows="3" placeholder="e.g. Chicken Curry"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="simple_lunch_time">Serving Time</label>
+                        <input type="time" id="simple_lunch_time">
+                    </div>
+                </div>
+
+                <div class="menu-simple-block" id="dinnerFields" hidden>
+                    <div class="form-group">
+                        <label for="simple_dinner_text">Veg Menu</label>
+                        <textarea id="simple_dinner_text" rows="3" placeholder="e.g. Chapati, Rice, Chhole, Salad"></textarea>
+                    </div>
+                    <div class="form-group menu-nonveg-toggle-row">
+                        <label for="simple_dinner_nonveg_toggle" class="menu-nonveg-toggle-label">
+                            <input type="checkbox" id="simple_dinner_nonveg_toggle" onchange="toggleNonVegField('dinner')">
+                            Enable Non-Veg Menu
+                        </label>
+                    </div>
+                    <div class="form-group" id="simple_dinner_nonveg_group" hidden>
+                        <label for="simple_dinner_nonveg_text">Non-Veg Menu</label>
+                        <textarea id="simple_dinner_nonveg_text" rows="3" placeholder="e.g. Chicken Curry"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="simple_dinner_time">Serving Time</label>
+                        <input type="time" id="simple_dinner_time">
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-lg" id="saveMenuBtn" onclick="saveMenuDay()">💾 Save Changes</button>
+                <div id="menu_save_result" aria-live="polite"></div>
+            </div>
+        </section>
 
     </div>
 </main>
 </div>
 
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 <script>
-    function initBillSummary() {
+    function initHome() {
         initCommon();
+
         if (isAdmin()) {
-            initCustomerSelector("bill_customer_id");
-            initCustomerSelector("history_customer_id");
+            document.getElementById("pageSubtitle").innerText =
+                "Manage tiffins and today's menu for all customers";
+            setBookingsMealFilter(getDefaultMealFilter());
+            loadMenuManager();
         } else {
-            document.getElementById("payNowSection").style.display = "block";
-            getBill();
-            loadHistory();
+            document.getElementById("pageSubtitle").innerText =
+                "View your meals for today";
+            loadTodaysMeals();
         }
     }
 
-    initBillSummary();
+    initHome();
 </script>
 
 </body>
