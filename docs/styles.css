@@ -1323,3 +1323,75 @@ body.sidebar-open { overflow: hidden; }
     color: var(--primary);
     font-weight: 600;
 }
+
+/* ── Auth page: stack login card + business info card ── */
+.auth-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    width: 100%;
+    max-width: 420px;
+}
+
+.auth-page {
+    height: auto;
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+}
+
+/* ── Business info card (below login) ── */
+.business-info-card {
+    width: 100%;
+}
+
+.business-info-card .card-header h2 {
+    font-size: var(--text-lg);
+}
+
+.business-tagline {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    margin-bottom: var(--space-6);
+}
+
+.business-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
+    gap: var(--space-4);
+    margin-bottom: var(--space-2);
+}
+
+.business-info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.business-info-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.business-info-value {
+    font-size: var(--text-sm);
+    color: var(--text);
+}
+
+.business-info-value a { color: var(--primary); }
+.business-info-value a:hover { color: var(--primary-hover); }
+
+.business-stats-grid { margin-top: var(--space-6); }
+
+.business-info-footer {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--border);
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-align: center;
+}
