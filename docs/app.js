@@ -6,6 +6,10 @@
 
 const API = "https://my-mess-q25u.onrender.com";
 
+// Remembers the most recently loaded bill so payNow() knows the pending
+// amount without needing another round-trip to the server.
+let lastBillData = null;
+
 if (localStorage.getItem("loggedIn") !== "true") {
     window.location.href = "login.html";
 }
@@ -417,16 +421,73 @@ function showAlert(elId, message, type) {
     el.innerText = message;
 }
 
-function toggleQR() {
-    const qr = document.getElementById("qrSection");
-    const btn = document.getElementById("payNowBtn");
-    if (qr.style.display === "none") {
-        qr.style.display = "block";
-        btn.innerText = "❌ Close";
-    } else {
-        qr.style.display = "none";
-        btn.innerText = "💳 Pay via UPI";
+// ── Razorpay "Pay Now" flow (customer bill payment) ──
+function payNow() {
+    const id = localStorage.getItem("customer_id");
+    if (!id) return;
+
+    if (!lastBillData || Number(lastBillData.pending) <= 0) {
+        alert("No pending amount to pay for the selected month.");
+        return;
     }
+
+    const amount = Number(lastBillData.pending);
+    const btn = document.getElementById("payNowBtn");
+    const originalText = btn.innerText;
+    btn.disabled = true;
+    btn.innerText = "Please wait...";
+
+    fetch(`${API}/create-razorpay-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ customer_id: id, amount: amount })
+    })
+    .then(res => res.json())
+    .then(order => {
+        btn.disabled = false;
+        btn.innerText = originalText;
+
+        if (!order.order_id) {
+            alert("Unable to start payment. Please try again.");
+            return;
+        }
+
+        const options = {
+            key: order.key_id,
+            amount: order.amount,
+            currency: order.currency,
+            name: "Bhandalkar Mess",
+            description: "Tiffin bill payment",
+            order_id: order.order_id,
+            prefill: {
+                name: localStorage.getItem("name") || "",
+                contact: localStorage.getItem("contact") || "",
+                email: localStorage.getItem("email") || ""
+            },
+            theme: { color: "#1fceb8" },
+            handler: function () {
+                alert("Payment successful! Your admin will confirm it shortly.");
+                getBill();
+            },
+            modal: {
+                ondismiss: function () {
+                    // Customer closed the checkout without paying — no action needed.
+                }
+            }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", function () {
+            alert("Payment failed. Please try again.");
+        });
+        rzp.open();
+    })
+    .catch(err => {
+        console.error(err);
+        btn.disabled = false;
+        btn.innerText = originalText;
+        alert("Unable to reach server. Please try again.");
+    });
 }
 
 // ── Shared page bootstrap: role classes, role badge, account modal fields ──
@@ -791,6 +852,7 @@ function getBill() {
     fetch(`${API}/final-bill/${id}${monthYearQuery("billMonthFilter")}`)
     .then(res => res.json())
     .then(data => {
+        lastBillData = data;
         document.getElementById("bill_result").innerHTML = `
             <div class="stats-grid">
                 <div class="stat-card">
