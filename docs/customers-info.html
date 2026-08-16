@@ -139,9 +139,16 @@
 
             <!-- UPI Pay Button - Customer Only -->
             <div class="customer-only" id="payNowSection" style="margin-top: 1rem; display: none;">
-                <button class="btn btn-primary" onclick="payNow()" id="payNowBtn">
-                    💳 Pay Now
+                <button class="btn btn-primary" onclick="toggleQR()" id="payNowBtn">
+                    💳 Pay via UPI
                 </button>
+
+                <div id="qrSection" class="qr-section" style="display: none;">
+                    <img src="PhonPay_QR.png" alt="UPI QR code for My Mess payment" class="qr-code-img">
+                    <p class="qr-upi-id">UPI ID: <strong>9021081442@axl</strong></p>
+                    <p class="qr-instruction">You can scan QR code using any UPI app</p>
+                    <p class="qr-warning">⚠️ Admin will record after payment</p>
+                </div>
             </div>
         </section>
 
@@ -229,7 +236,6 @@
 </main>
 </div>
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="app.js?v=13"></script>
 <script>
     function initBillSummary() {
