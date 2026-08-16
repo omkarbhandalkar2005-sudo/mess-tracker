@@ -6,6 +6,13 @@ const https      = require('https');
 const app        = express();
 const db         = require('./db');
 
+// Razorpay client — Order banane ke liye
+const Razorpay = require('razorpay');
+const razorpay = new Razorpay({
+    key_id:     process.env.RAZORPAY_KEY_ID,
+    key_secret: process.env.RAZORPAY_KEY_SECRET
+});
+
 app.use(cors());
 app.use(express.json());
 
@@ -361,6 +368,35 @@ app.post('/add-payment', (req, res) => {
         }
 
         return res.status(201).json({ message: "Payment recorded successfully 💰" });
+    });
+});
+
+// CREATE RAZORPAY ORDER (customer "Pay Now" dabata hai toh ye call hota hai)
+app.post('/create-razorpay-order', (req, res) => {
+    const { customer_id, amount } = req.body;
+
+    if (!customer_id || !amount) {
+        return res.status(400).json({ message: "customer_id and amount are required" });
+    }
+
+    const options = {
+        amount:   Math.round(amount * 100), // Razorpay paise mein leta hai (₹1 = 100)
+        currency: "INR",
+        receipt:  `receipt_${customer_id}_${Date.now()}`
+    };
+
+    razorpay.orders.create(options, (err, order) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error creating Razorpay order" });
+        }
+
+        res.status(200).json({
+            order_id: order.id,
+            amount:   order.amount,
+            currency: order.currency,
+            key_id:   process.env.RAZORPAY_KEY_ID
+        });
     });
 });
 
