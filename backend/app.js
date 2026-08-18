@@ -3,6 +3,7 @@ const express    = require('express');
 const cors       = require('cors');
 const bcrypt     = require('bcrypt');
 const https      = require('https');
+const crypto     = require('crypto');
 const app        = express();
 const db         = require('./db');
 
@@ -14,7 +15,12 @@ const razorpay = new Razorpay({
 });
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({
+    // Razorpay's webhook signature is computed over the exact raw bytes
+    // of the request body, so we stash them here before body-parsing
+    // turns req.body into a JS object.
+    verify: (req, res, buf) => { req.rawBody = buf; }
+}));
 
 const TIFFIN_PRICE  = 70;
 const FAST_PRICE    = 40;
@@ -382,7 +388,10 @@ app.post('/create-razorpay-order', (req, res) => {
     const options = {
         amount:   Math.round(amount * 100), // Razorpay paise mein leta hai (₹1 = 100)
         currency: "INR",
-        receipt:  `receipt_${customer_id}_${Date.now()}`
+        receipt:  `receipt_${customer_id}_${Date.now()}`,
+        notes: {
+            customer_id: String(customer_id) // webhook isse padhega payment record karne ke liye
+        }
     };
 
     razorpay.orders.create(options, (err, order) => {
@@ -396,6 +405,80 @@ app.post('/create-razorpay-order', (req, res) => {
             amount:   order.amount,
             currency: order.currency,
             key_id:   process.env.RAZORPAY_KEY_ID
+        });
+    });
+});
+
+// RAZORPAY WEBHOOK — Razorpay ka server ye call karta hai jab payment
+// capture hoti hai. Isse customer ka payment automatically `payments`
+// table mein record ho jata hai, admin ko manually kuch nahi karna padta.
+app.post('/razorpay-webhook', (req, res) => {
+    const signature = req.headers['x-razorpay-signature'];
+    const secret    = process.env.RAZORPAY_WEBHOOK_SECRET;
+
+    if (!signature || !secret || !req.rawBody) {
+        return res.status(400).json({ message: "Missing signature or webhook not configured" });
+    }
+
+    // Signature verify karo — confirm karta hai ye request sach mein
+    // Razorpay se aayi hai, kisi aur ne fake call nahi kiya
+    const expectedSignature = crypto
+        .createHmac('sha256', secret)
+        .update(req.rawBody)
+        .digest('hex');
+
+    const sigMatches = signature.length === expectedSignature.length &&
+        crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(signature));
+
+    if (!sigMatches) {
+        console.error('❌ Razorpay webhook: signature mismatch');
+        return res.status(400).json({ message: "Invalid signature" });
+    }
+
+    const event = req.body.event;
+
+    // Sirf successful payment pe react karo, baaki events ignore (but 200 bhejo,
+    // warna Razorpay retry karta rahega)
+    if (event !== 'payment.captured') {
+        return res.status(200).json({ status: "ignored", event });
+    }
+
+    const payment           = req.body.payload.payment.entity;
+    const razorpayPaymentId = payment.id;
+    const customerId        = payment.notes && payment.notes.customer_id;
+    const amountPaid        = payment.amount / 100; // paise -> rupees
+
+    if (!customerId) {
+        console.error('⚠️ Razorpay webhook: payment.captured without customer_id in notes', razorpayPaymentId);
+        return res.status(200).json({ status: "ignored_no_customer_id" });
+    }
+
+    // Idempotency check — Razorpay same webhook kai baar bhej sakta hai
+    // (retries), isliye duplicate insert na ho ye zaroor check karna hai
+    const checkSql = `SELECT id FROM payments WHERE razorpay_payment_id = ?`;
+
+    db.query(checkSql, [razorpayPaymentId], (err, rows) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "DB error while checking payment" });
+        }
+
+        if (rows.length > 0) {
+            return res.status(200).json({ status: "already_recorded" });
+        }
+
+        const { date } = getIST();
+        const insertSql = `INSERT INTO payments (customer_id, amount_paid, date, razorpay_payment_id, source)
+                            VALUES (?, ?, ?, ?, 'razorpay')`;
+
+        db.query(insertSql, [customerId, amountPaid, date, razorpayPaymentId], (err2) => {
+            if (err2) {
+                console.error(err2);
+                return res.status(500).json({ message: "Error recording payment" });
+            }
+
+            console.log(`✅ Razorpay payment auto-recorded: customer ${customerId}, ₹${amountPaid}`);
+            return res.status(200).json({ status: "recorded" });
         });
     });
 });

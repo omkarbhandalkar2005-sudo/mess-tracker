@@ -466,8 +466,9 @@ function payNow() {
             },
             theme: { color: "#1fceb8" },
             handler: function () {
-                alert("Payment successful! Your admin will confirm it shortly.");
+                alert("Payment successful! Your bill will update automatically in a few seconds.");
                 getBill();
+                setTimeout(getBill, 4000); // webhook ko record karne ka time dene ke liye
             },
             modal: {
                 ondismiss: function () {
