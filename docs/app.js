@@ -1154,6 +1154,7 @@ function loadMenuManager() {
         const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
         document.getElementById("menuDaySelector").value = todayName;
         renderMenuDay(todayName);
+        setMealTab(getDefaultMealFilter().toLowerCase());
     })
     .catch(err => {
         console.error(err);
