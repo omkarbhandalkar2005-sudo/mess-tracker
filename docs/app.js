@@ -84,7 +84,7 @@ function loadAllCustomers() {
             <td>${c.name}</td>
             <td>${c.totalTiffin}</td>
             <td>₹${c.totalAmount}</td>
-            <td>₹${c.totalPaid}</td>
+            <td style="color:#16a34a;">₹${c.totalPaid}</td>
             <td style="color:${c.pending > 0 ? '#dc2626' : '#16a34a'};">₹${c.pending}</td>
         </tr>`).join("");
 
@@ -101,7 +101,7 @@ function loadAllCustomers() {
             <td>Total</td>
             <td>${totals.totalTiffin}</td>
             <td>₹${totals.totalAmount}</td>
-            <td>₹${totals.totalPaid}</td>
+            <td style="color:#16a34a;">₹${totals.totalPaid}</td>
             <td style="color:${totals.pending > 0 ? '#dc2626' : '#16a34a'};">₹${totals.pending}</td>
         </tr>`;
 
