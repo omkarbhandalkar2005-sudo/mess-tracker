@@ -23,8 +23,8 @@ app.use(express.json({
 }));
 
 const TIFFIN_PRICE  = 70;
-const FAST_PRICE    = 40;
-const CHAPATI_PRICE    = 10;
+const FAST_PRICE    = 50;
+const CHAPATI_PRICE = 10;
 const BHAKARI_PRICE = 10;
 
 const otpStore      = {};
