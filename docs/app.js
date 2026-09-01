@@ -41,7 +41,7 @@ function getCurrentMonthValue() {
 
 function initMonthFilters() {
     const current = getCurrentMonthValue();
-    ["allCustomersMonthFilter", "billMonthFilter", "historyMonthFilter"].forEach(id => {
+    ["allCustomersMonthFilter", "billMonthFilter"].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = current;
     });
@@ -60,10 +60,6 @@ function onAllCustomersMonthChange() {
 
 function onBillMonthChange() {
     getBill();
-}
-
-function onHistoryMonthChange() {
-    loadHistory();
 }
 
 function loadAllCustomers() {
@@ -880,6 +876,7 @@ function getBill() {
                     <div class="stat-value">₹${data.pending}</div>
                 </div>
             </div>`;
+        loadHistory();
     })
     .catch(err => {
         console.error(err);
@@ -888,10 +885,10 @@ function getBill() {
 }
 
 function loadHistory() {
-    const id = getCustomerId("history_customer_id");
+    const id = getCustomerId("bill_customer_id");
     if (!id) return;
 
-    const q = monthYearQuery("historyMonthFilter");
+    const q = monthYearQuery("billMonthFilter");
 
     Promise.all([
         fetch(`${API}/tiffin-history/${id}${q}`).then(r => r.json()),
