@@ -49,7 +49,7 @@
             <!-- OTP Section -->
             <div class="form-group">
                 <label for="otp">OTP</label>
-                <input type="text" id="otp" placeholder="6-digit OTP enter karo" autocomplete="one-time-code" disabled>
+                <input type="text" id="otp" placeholder="Enter 6-digit OTP" autocomplete="one-time-code" disabled>
             </div>
             <button class="btn btn-primary" id="otpBtn" onclick="sendOTP()" style="margin-bottom: var(--space-3);">Send OTP</button>
 
@@ -75,7 +75,7 @@ function sendOTP() {
 
     if (!email) {
         msgEl.className = "alert alert-error";
-        msgEl.innerText = "Pehle email daalo!";
+        msgEl.innerText = "Please enter your email first!";
         return;
     }
 
@@ -93,11 +93,11 @@ function sendOTP() {
     .then(data => {
         if (data.message.includes("sent")) {
             msgEl.className = "alert alert-success";
-            msgEl.innerText = "OTP bhej diya! Email check karo 📧";
+            msgEl.innerText = "OTP sent! Please check your email 📧";
             document.getElementById("otp").disabled        = false;
             document.getElementById("registerBtn").disabled = false;
 
-            // Resend button 60 seconds baad
+            // Resend button after 60 seconds
             let secs = 60;
             const timer = setInterval(() => {
                 otpBtn.innerText = `Resend (${secs}s)`;
@@ -117,7 +117,7 @@ function sendOTP() {
     })
     .catch(() => {
         msgEl.className  = "alert alert-error";
-        msgEl.innerText  = "Server se connect nahi ho pa raha!";
+        msgEl.innerText  = "Unable to connect to the server!";
         otpBtn.disabled  = false;
         otpBtn.innerText = "Send OTP";
     });
@@ -138,7 +138,7 @@ function register() {
 
     if (!data.name || !data.contact || !data.email || !data.password || !data.otp) {
         msgEl.className = "alert alert-error";
-        msgEl.innerText = "Sabhi fields bharo aur OTP verify karo!";
+        msgEl.innerText = "Please fill all fields and verify OTP!";
         return;
     }
 

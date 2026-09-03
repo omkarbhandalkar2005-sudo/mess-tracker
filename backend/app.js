@@ -31,7 +31,7 @@ const BHAKARI_PRICE = 10;
 const otpStore      = {};
 const resetOtpStore = {};
 
-// Server UTC time pe chalta hai (Railway), isliye IST (India) date/day nikalne ke liye ye helper
+// Server runs on UTC time (Railway), so this helper converts to IST (India) date/day
 function getIST() {
     const now        = new Date();
     const utcMs      = now.getTime() + (now.getTimezoneOffset() * 60000);
@@ -45,7 +45,7 @@ function getIST() {
     return { date: `${yyyy}-${mm}-${dd}`, day: days[ist.getDay()] };
 }
 
-// Brevo API se email bhejo
+// Send email via Brevo API
 function sendEmail(to, subject, htmlContent, callback) {
     const data = JSON.stringify({
         sender: { name: "Mess Tracker", email: "messtrackerapp@gmail.com" },
@@ -138,12 +138,12 @@ app.post('/register', (req, res) => {
     const stored = otpStore[email];
 
     if (!stored) {
-        return res.status(400).json({ message: "Pehle OTP bhejo" });
+        return res.status(400).json({ message: "Please request an OTP first" });
     }
 
     if (Date.now() > stored.expiry) {
         delete otpStore[email];
-        return res.status(400).json({ message: "OTP expire ho gaya, dobara bhejo" });
+        return res.status(400).json({ message: "OTP has expired, please request a new one" });
     }
 
     if (stored.otp !== otp) {
@@ -221,10 +221,10 @@ app.post('/forgot-password/send-otp', (req, res) => {
             return res.status(500).json({ message: "Server error" });
         }
 
-        // Security: same message chahe email exist kare ya na kare, taaki koi ye pata na laga sake
-        // ki kaunse emails registered hain. Lekin OTP sirf tabhi bhejenge jab email exist kare.
+        // Security: return the same message whether the email exists or not, so no one can
+        // figure out which emails are registered. OTP is only sent if the email actually exists.
         if (result.length === 0) {
-            return res.status(200).json({ message: "Agar ye email registered hai, to OTP bhej diya gaya hai ✅" });
+            return res.status(200).json({ message: "If this email is registered, an OTP has been sent ✅" });
         }
 
         const otp    = Math.floor(100000 + Math.random() * 900000).toString();
@@ -237,7 +237,7 @@ app.post('/forgot-password/send-otp', (req, res) => {
             <p>Your OTP to reset your password is:</p>
             <h1 style="color: #4CAF50; letter-spacing: 5px;">${otp}</h1>
             <p>This OTP will expire in 5 minutes.</p>
-            <p>Agar tumne ye request nahi ki, to is email ko ignore kar do.</p>
+            <p>If you did not request this, please ignore this email.</p>
         `;
 
         sendEmail(email, "Mess Tracker - Password Reset OTP", html, (err) => {
@@ -245,7 +245,7 @@ app.post('/forgot-password/send-otp', (req, res) => {
                 console.error(err);
                 return res.status(500).json({ message: "Error sending OTP" });
             }
-            return res.status(200).json({ message: "Agar ye email registered hai, to OTP bhej diya gaya hai ✅" });
+            return res.status(200).json({ message: "If this email is registered, an OTP has been sent ✅" });
         });
     });
 });
@@ -265,12 +265,12 @@ app.post('/forgot-password/reset', (req, res) => {
     const stored = resetOtpStore[email];
 
     if (!stored) {
-        return res.status(400).json({ message: "Pehle OTP bhejo" });
+        return res.status(400).json({ message: "Please request an OTP first" });
     }
 
     if (Date.now() > stored.expiry) {
         delete resetOtpStore[email];
-        return res.status(400).json({ message: "OTP expire ho gaya, dobara bhejo" });
+        return res.status(400).json({ message: "OTP has expired, please request a new one" });
     }
 
     if (stored.otp !== otp) {
@@ -378,7 +378,7 @@ app.post('/add-payment', (req, res) => {
     });
 });
 
-// CREATE RAZORPAY ORDER (customer "Pay Now" dabata hai toh ye call hota hai)
+// CREATE RAZORPAY ORDER (called when customer taps "Pay Now")
 app.post('/create-razorpay-order', (req, res) => {
     const { customer_id, amount } = req.body;
 
@@ -387,7 +387,7 @@ app.post('/create-razorpay-order', (req, res) => {
     }
 
     const options = {
-        amount:   Math.round(amount * 100), // Razorpay paise mein leta hai (₹1 = 100)
+        amount:   Math.round(amount * 100), // Razorpay takes amount in paise (₹1 = 100)
         currency: "INR",
         receipt:  `receipt_${customer_id}_${Date.now()}`,
         notes: {
@@ -410,9 +410,9 @@ app.post('/create-razorpay-order', (req, res) => {
     });
 });
 
-// RAZORPAY WEBHOOK — Razorpay ka server ye call karta hai jab payment
-// capture hoti hai. Isse customer ka payment automatically `payments`
-// table mein record ho jata hai, admin ko manually kuch nahi karna padta.
+// RAZORPAY WEBHOOK — Razorpay's server calls this when a payment is
+// captured. This automatically records the customer's payment in the
+// `payments` table, so the admin doesn't have to do it manually.
 app.post('/razorpay-webhook', (req, res) => {
     const signature = req.headers['x-razorpay-signature'];
     const secret    = process.env.RAZORPAY_WEBHOOK_SECRET;
@@ -421,8 +421,8 @@ app.post('/razorpay-webhook', (req, res) => {
         return res.status(400).json({ message: "Missing signature or webhook not configured" });
     }
 
-    // Signature verify karo — confirm karta hai ye request sach mein
-    // Razorpay se aayi hai, kisi aur ne fake call nahi kiya
+    // Verify signature — confirms this request genuinely came from
+    // Razorpay and wasn't a fake call from someone else
     const expectedSignature = crypto
         .createHmac('sha256', secret)
         .update(req.rawBody)
@@ -438,8 +438,8 @@ app.post('/razorpay-webhook', (req, res) => {
 
     const event = req.body.event;
 
-    // Sirf successful payment pe react karo, baaki events ignore (but 200 bhejo,
-    // warna Razorpay retry karta rahega)
+    // Only react to successful payment events, ignore the rest (but return 200,
+    // otherwise Razorpay will keep retrying)
     if (event !== 'payment.captured') {
         return res.status(200).json({ status: "ignored", event });
     }
@@ -454,8 +454,8 @@ app.post('/razorpay-webhook', (req, res) => {
         return res.status(200).json({ status: "ignored_no_customer_id" });
     }
 
-    // Idempotency check — Razorpay same webhook kai baar bhej sakta hai
-    // (retries), isliye duplicate insert na ho ye zaroor check karna hai
+    // Idempotency check — Razorpay can send the same webhook multiple times
+    // (retries), so we must check to avoid inserting duplicates
     const checkSql = `SELECT id FROM payments WHERE razorpay_payment_id = ?`;
 
     db.query(checkSql, [razorpayPaymentId], (err, rows) => {
